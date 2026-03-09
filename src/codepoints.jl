@@ -160,7 +160,7 @@ code point of the largest positive value (may be infinity)
 cp_positive_max(fmt::Format) = cp_nan(fmt) - one(typeofcp(fmt))
 
 """Return `true` if `cp` is a positive code point (between zero and NaN, exclusive)."""
-function cp_is_positive(@nospecialize fmt::Format, cp::Integer)
+function cp_is_positive(@nospecialize(fmt::Format), cp::Integer)
     cp_zero(fmt) < cp < cp_nan(fmt)
 end
 
@@ -171,7 +171,7 @@ end
 
 """Return `true` if `cp` is a negative code point. Always `false` for unsigned formats."""
 cp_is_negative(@nospecialize fmt::Format{is_unsigned,T}, cp::Integer) where T = false
-function cp_is_negative(@nospecialize fmt::Format{is_signed,T}, cp::Integer) where T
+function cp_is_negative(@nospecialize(fmt::Format{is_signed,T}), cp::Integer) where T
     cp > cp_nan(fmt)
 end
 
@@ -180,39 +180,39 @@ end
 
 given fmt, cp(+value), find cp(-value)
 """
-function pos_cp_to_neg_cp(@nospecialize fmt::Format{is_signed,T}, cp_pos::Integer) where T
+function pos_cp_to_neg_cp(@nospecialize(fmt::Format{is_signed,T}), cp_pos::Integer) where T
     cp_is_positive(fmt, cp_pos) || throw(ArgumentError("cp_pos ($cp_pos) must be a positive code point"))
     unsafe_pos_cp_to_neg_cp(fmt, cp_pos)
 end
 
 """Map a positive code point to its negative counterpart — no bounds check."""
-unsafe_pos_cp_to_neg_cp(@nospecialize fmt::Format{is_signed,T}, cp_pos::Integer) where T =
+unsafe_pos_cp_to_neg_cp(@nospecialize(fmt::Format{is_signed,T}), cp_pos::Integer) where T =
     twopow(BitwidthOf(fmt) - 1) + cp_pos
 
-unsafe_pos_cp_to_neg_cp(@nospecialize fmt::Format{is_unsigned,T}, cp_pos::Integer) where T = nothing
+unsafe_pos_cp_to_neg_cp(@nospecialize(fmt::Format{is_unsigned,T}), cp_pos::Integer) where T = nothing
 
 """
     neg_cp_to_pos_cp(fmt, cp_neg)
 
 given fmt, cp(-value), find cp(+value)
 """
-function neg_cp_to_pos_cp(@nospecialize fmt::Format{is_signed,T}, cp_neg::Integer) where T
+function neg_cp_to_pos_cp(@nospecialize(fmt::Format{is_signed,T}), cp_neg::Integer) where T
     cp_is_negative(fmt, cp_neg) || throw(ArgumentError("cp_neg ($cp_neg) must be a negative code point"))
     unsafe_neg_cp_to_pos_cp(fmt, cp_neg)
 end
 
 """Map a negative code point to its positive counterpart — no bounds check."""
-unsafe_neg_cp_to_pos_cp(@nospecialize fmt::Format{is_signed,T}, cp_neg::Integer) where T =
+unsafe_neg_cp_to_pos_cp(@nospecialize(fmt::Format{is_signed,T}), cp_neg::Integer) where T =
     cp_neg - twopow(BitwidthOf(fmt) - 1)
 
-unsafe_neg_cp_to_pos_cp(@nospecialize fmt::Format{is_unsigned,T}, cp_neg::Integer) where T = nothing
+unsafe_neg_cp_to_pos_cp(@nospecialize(fmt::Format{is_unsigned,T}), cp_neg::Integer) where T = nothing
 
 """
     cp_changesign(fmt, cp)
 
 given fmt, cp, find corresponding sign-changed code point
 """
-function cp_changesign(@nospecialize fmt::Format{is_signed,T}, cp::Integer) where T
+function cp_changesign(@nospecialize(fmt::Format{is_signed,T}), cp::Integer) where T
     if cp == cp_zero(fmt) || cp == cp_nan(fmt)
         return cp
     end
@@ -222,3 +222,4 @@ function cp_changesign(@nospecialize fmt::Format{is_signed,T}, cp::Integer) wher
         unsafe_neg_cp_to_pos_cp(fmt, cp)
     end
 end
+

@@ -365,28 +365,16 @@ end
 # display
 # -----------------------------------------------------------------------------
 
-function Base.show(io::IO, q::ExtendedRational)
-    if isnan(q)
-        print(io, "NaN")
-    elseif isinf(q)
-        print(io, signbit(q) ? "-Inf" : "Inf")
-    else
-        show(io, q.num)
-        print(io, "//")
-        show(io, q.den)
-    end
-end
-
 # Delegate string() to show to avoid duplicating logic.
 Base.string(q::ExtendedRational) = sprint(show, q)
 
 function Base.show(io::IO, ::MIME"text/plain", q::ExtendedRational)
     if isnan(q)
-        print(io, "ExtendedRational(NaN)")
+        print(io, "NaN")
     elseif isinf(q)
-        print(io, signbit(q) ? "ExtendedRational(-Inf)" : "ExtendedRational(Inf)")
+        print(io, signbit(q) ? "-Inf" : "Inf")
     else
-        print(io, "ExtendedRational(")
+        print(io, "(")
         show(io, q.num)
         print(io, "//")
         show(io, q.den)

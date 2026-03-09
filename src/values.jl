@@ -4,14 +4,16 @@
 """
     ValueOf(fmt, cp) -> ClosedRational
 
-Return the exact rational value of code point `cp` in format `fmt`.
+Return the exact `ClosedRational` value of code point `cp` in format `fmt`.
 
-- zero  → `0 // 1`
-- +Inf  → `1 // 0`
-- -Inf  → `-1 // 0`
-- NaN   → `0 // 0``
+Special code points map to the canonical `ClosedRational` forms:
 
-For finite numerical code points, the result is an exact dyadic rational.
+- zero  → `0//1`
+- +Inf  → `1//0`
+- -Inf  → `-1//0`
+- NaN   → `0//0`
+
+For finite numerical code points the result is an exact dyadic rational.
 """
 function ValueOf(@nospecialize(fmt::Format), cp::Integer)
     0 <= cp <= cp_max(fmt) || throw(ArgumentError("code point $cp out of range [0, $(cp_max(fmt))]"))

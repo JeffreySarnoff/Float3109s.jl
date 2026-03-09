@@ -168,7 +168,7 @@ function Base.hash(q::ExtendedRational, h::UInt)
     if isnan(q)
         return hash((:ExtendedRational, :NaN), h)
     elseif isinf(q)
-        return hash((:ExtendedRational, signbit(q) ? : -Inf : Inf), h)
+        return hash((:ExtendedRational, signbit(q) ? -Inf : Inf), h)
     else
         return hash((:ExtendedRational, q.num, q.den), h)
     end

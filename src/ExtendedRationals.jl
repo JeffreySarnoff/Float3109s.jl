@@ -63,8 +63,6 @@ struct ExtendedRational <: Real
     end
 end
 
-const NegInf = ExtendedRational(-1, 0)
-
 # -----------------------------------------------------------------------------
 # constructors and basic accessors
 # -----------------------------------------------------------------------------
@@ -89,6 +87,8 @@ function ExtendedRational(x::AbstractFloat)
         return ExtendedRational(numerator(r), denominator(r))
     end
 end
+
+const NegInf = ExtendedRational(-1, 0)
 
 # ExtendedRational(NaN) = ExtendedRational(0, 0)
 # ExtendedRational(Inf) = ExtendedRational(1, 0)

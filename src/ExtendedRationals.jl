@@ -90,7 +90,7 @@ end
 
 ExtendedRational(NaN) = ExtendedRational(0, 0)
 ExtendedRational(Inf) = ExtendedRational(1, 0)
-ExtendedRational(-Inf) = ExtendedRational(-1, 0)
+ExtendedRational(NegInf) = ExtendedRational(-1, 0)
 
 Base.NaN(::ExtendedRational)  = ExtendedRational(NaN)
 Base.Inf(::ExtendedRational)  = ExtendedRational(Inf)

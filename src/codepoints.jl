@@ -26,23 +26,23 @@ cp_max(fmt::Format) = typeofcp(fmt)(twopow(BitwidthOf(fmt)) - 1)
 cp_zero(fmt::Format) = zero(typeofcp(fmt))
 
 """Code point of NaN. Unsigned: `cp_max`. Signed: midpoint `2^(K-1)`."""
-cp_nan(@no_specialize fmt::Format{is_unsigned,T}) where T = cp_max(fmt)
-cp_nan(@no_specialize fmt::Format{is_signed,T}) where T = typeofcp(fmt)(sign_half_offset(fmt))
+cp_nan(@nospecialize fmt::Format{is_unsigned,T}) where T = cp_max(fmt)
+cp_nan(@nospecialize fmt::Format{is_signed,T}) where T = typeofcp(fmt)(sign_half_offset(fmt))
 
 """Code point of +Inf, or `nothing` for finite-domain formats."""
-cp_inf(@no_specialize fmt::Format{is_unsigned,is_extended}) = cp_nan(fmt) - one(typeofcp(fmt))
-cp_inf(@no_specialize fmt::Format{is_signed,is_extended}) = cp_nan(fmt) - one(typeofcp(fmt))
-cp_inf(@no_specialize fmt::Format{is_unsigned,is_finite}) = nothing
-cp_inf(@no_specialize fmt::Format{is_signed,is_finite}) = nothing
+cp_inf(@nospecialize fmt::Format{is_unsigned,is_extended}) = cp_nan(fmt) - one(typeofcp(fmt))
+cp_inf(@nospecialize fmt::Format{is_signed,is_extended}) = cp_nan(fmt) - one(typeofcp(fmt))
+cp_inf(@nospecialize fmt::Format{is_unsigned,is_finite}) = nothing
+cp_inf(@nospecialize fmt::Format{is_signed,is_finite}) = nothing
 
 """Alias for [`cp_inf`](@ref)."""
 cp_posinf = cp_inf
 
 """Code point of -Inf, or `nothing` if absent (unsigned or finite-domain)."""
-cp_neginf(@no_specialize fmt::Format{is_unsigned,is_extended}) = nothing
-cp_neginf(@no_specialize fmt::Format{is_signed,is_extended}) = cp_max(fmt)
-cp_neginf(@no_specialize fmt::Format{is_unsigned,is_finite}) = nothing
-cp_neginf(@no_specialize fmt::Format{is_signed,is_finite}) = nothing
+cp_neginf(@nospecialize fmt::Format{is_unsigned,is_extended}) = nothing
+cp_neginf(@nospecialize fmt::Format{is_signed,is_extended}) = cp_max(fmt)
+cp_neginf(@nospecialize fmt::Format{is_unsigned,is_finite}) = nothing
+cp_neginf(@nospecialize fmt::Format{is_signed,is_finite}) = nothing
 
 """
     cp_pos_subnormal_min(fmt)
@@ -63,8 +63,8 @@ cp_pos_subnormal_max(fmt::Format) = PrecisionOf(fmt) > 1 ? typeofcp(fmt)(twopow(
 
 the code point for the negative subnormal of least magnitude, or `nothing`
 """
-cp_neg_subnormal_min(@no_specialize fmt::Format{is_unsigned,T}) where T = nothing
-cp_neg_subnormal_min(@no_specialize fmt::Format{is_signed,T}) where T =
+cp_neg_subnormal_min(@nospecialize fmt::Format{is_unsigned,T}) where T = nothing
+cp_neg_subnormal_min(@nospecialize fmt::Format{is_signed,T}) where T =
     PrecisionOf(fmt) > 1 ? cp_nan(fmt) + one(typeofcp(fmt)) : nothing
 
 """
@@ -72,8 +72,8 @@ cp_neg_subnormal_min(@no_specialize fmt::Format{is_signed,T}) where T =
 
 the code point for the negative subnormal of greatest magnitude, or `nothing`
 """
-cp_neg_subnormal_max(@no_specialize fmt::Format{is_unsigned,T}) where T = nothing
-cp_neg_subnormal_max(@no_specialize fmt::Format{is_signed,T}) where T =
+cp_neg_subnormal_max(@nospecialize fmt::Format{is_unsigned,T}) where T = nothing
+cp_neg_subnormal_max(@nospecialize fmt::Format{is_signed,T}) where T =
     PrecisionOf(fmt) > 1 ? typeofcp(fmt)(twopow(BitwidthOf(fmt) - 1) + twopow(PrecisionOf(fmt) - 1) - 1) : nothing
 
 """
@@ -106,18 +106,18 @@ cp_pos_normal_min(fmt::Format) = typeofcp(fmt)(twopow(PrecisionOf(fmt) - 1))
 
 the code point for the positive normal of greatest magnitude
 """
-cp_pos_normal_max(@no_specialize fmt::Format{is_unsigned,is_finite}) = typeofcp(fmt)(twopow(BitwidthOf(fmt)) - 2)
-cp_pos_normal_max(@no_specialize fmt::Format{is_unsigned,is_extended}) = typeofcp(fmt)(twopow(BitwidthOf(fmt)) - 3)
-cp_pos_normal_max(@no_specialize fmt::Format{is_signed,is_finite}) = cp_nan(fmt) - one(typeofcp(fmt))
-cp_pos_normal_max(@no_specialize fmt::Format{is_signed,is_extended}) = cp_nan(fmt) - 2 * one(typeofcp(fmt))
+cp_pos_normal_max(@nospecialize fmt::Format{is_unsigned,is_finite}) = typeofcp(fmt)(twopow(BitwidthOf(fmt)) - 2)
+cp_pos_normal_max(@nospecialize fmt::Format{is_unsigned,is_extended}) = typeofcp(fmt)(twopow(BitwidthOf(fmt)) - 3)
+cp_pos_normal_max(@nospecialize fmt::Format{is_signed,is_finite}) = cp_nan(fmt) - one(typeofcp(fmt))
+cp_pos_normal_max(@nospecialize fmt::Format{is_signed,is_extended}) = cp_nan(fmt) - 2 * one(typeofcp(fmt))
 
 """
     cp_neg_normal_min(fmt)
 
 the code point for the negative normal of least magnitude, or `nothing`
 """
-cp_neg_normal_min(@no_specialize fmt::Format{is_unsigned,T}) where T = nothing
-function cp_neg_normal_min(@no_specialize fmt::Format{is_signed,T}) where T
+cp_neg_normal_min(@nospecialize fmt::Format{is_unsigned,T}) where T = nothing
+function cp_neg_normal_min(@nospecialize fmt::Format{is_signed,T}) where T
     if PrecisionOf(fmt) > 1
         cp_neg_subnormal_max(fmt) + one(typeofcp(fmt))
     else
@@ -130,9 +130,9 @@ end
 
 the code point for the negative normal of greatest magnitude, or `nothing`
 """
-cp_neg_normal_max(@no_specialize fmt::Format{is_unsigned,T}) where T = nothing
-cp_neg_normal_max(@no_specialize fmt::Format{is_signed,is_extended}) = cp_max(fmt) - one(typeofcp(fmt))
-cp_neg_normal_max(@no_specialize fmt::Format{is_signed,is_finite}) = cp_max(fmt)
+cp_neg_normal_max(@nospecialize fmt::Format{is_unsigned,T}) where T = nothing
+cp_neg_normal_max(@nospecialize fmt::Format{is_signed,is_extended}) = cp_max(fmt) - one(typeofcp(fmt))
+cp_neg_normal_max(@nospecialize fmt::Format{is_signed,is_finite}) = cp_max(fmt)
 
 """
     unsafe_cp_ordinal_ith_pos_normal(fmt, i)
@@ -160,18 +160,18 @@ code point of the largest positive value (may be infinity)
 cp_positive_max(fmt::Format) = cp_nan(fmt) - one(typeofcp(fmt))
 
 """Return `true` if `cp` is a positive code point (between zero and NaN, exclusive)."""
-function cp_is_positive(@no_specialize fmt::Format, cp::Integer)
+function cp_is_positive(@nospecialize fmt::Format, cp::Integer)
     cp_zero(fmt) < cp < cp_nan(fmt)
 end
 
 """Return `true` if `cp` is a non-negative code point (zero or positive)."""
-function cp_is_nonnegative(@no_specialize fmt::Format, cp::Integer)
+function cp_is_nonnegative(@nospecialize fmt::Format, cp::Integer)
     cp_zero(fmt) <= cp < cp_nan(fmt)
 end
 
 """Return `true` if `cp` is a negative code point. Always `false` for unsigned formats."""
-cp_is_negative(@no_specialize fmt::Format{is_unsigned,T}, cp::Integer) where T = false
-function cp_is_negative(@no_specialize fmt::Format{is_signed,T}, cp::Integer) where T
+cp_is_negative(@nospecialize fmt::Format{is_unsigned,T}, cp::Integer) where T = false
+function cp_is_negative(@nospecialize fmt::Format{is_signed,T}, cp::Integer) where T
     cp > cp_nan(fmt)
 end
 
@@ -180,39 +180,39 @@ end
 
 given fmt, cp(+value), find cp(-value)
 """
-function pos_cp_to_neg_cp(@no_specialize fmt::Format{is_signed,T}, cp_pos::Integer) where T
+function pos_cp_to_neg_cp(@nospecialize fmt::Format{is_signed,T}, cp_pos::Integer) where T
     cp_is_positive(fmt, cp_pos) || throw(ArgumentError("cp_pos ($cp_pos) must be a positive code point"))
     unsafe_pos_cp_to_neg_cp(fmt, cp_pos)
 end
 
 """Map a positive code point to its negative counterpart — no bounds check."""
-unsafe_pos_cp_to_neg_cp(@no_specialize fmt::Format{is_signed,T}, cp_pos::Integer) where T =
+unsafe_pos_cp_to_neg_cp(@nospecialize fmt::Format{is_signed,T}, cp_pos::Integer) where T =
     twopow(BitwidthOf(fmt) - 1) + cp_pos
 
-unsafe_pos_cp_to_neg_cp(@no_specialize fmt::Format{is_unsigned,T}, cp_pos::Integer) where T = nothing
+unsafe_pos_cp_to_neg_cp(@nospecialize fmt::Format{is_unsigned,T}, cp_pos::Integer) where T = nothing
 
 """
     neg_cp_to_pos_cp(fmt, cp_neg)
 
 given fmt, cp(-value), find cp(+value)
 """
-function neg_cp_to_pos_cp(@no_specialize fmt::Format{is_signed,T}, cp_neg::Integer) where T
+function neg_cp_to_pos_cp(@nospecialize fmt::Format{is_signed,T}, cp_neg::Integer) where T
     cp_is_negative(fmt, cp_neg) || throw(ArgumentError("cp_neg ($cp_neg) must be a negative code point"))
     unsafe_neg_cp_to_pos_cp(fmt, cp_neg)
 end
 
 """Map a negative code point to its positive counterpart — no bounds check."""
-unsafe_neg_cp_to_pos_cp(@no_specialize fmt::Format{is_signed,T}, cp_neg::Integer) where T =
+unsafe_neg_cp_to_pos_cp(@nospecialize fmt::Format{is_signed,T}, cp_neg::Integer) where T =
     cp_neg - twopow(BitwidthOf(fmt) - 1)
 
-unsafe_neg_cp_to_pos_cp(@no_specialize fmt::Format{is_unsigned,T}, cp_neg::Integer) where T = nothing
+unsafe_neg_cp_to_pos_cp(@nospecialize fmt::Format{is_unsigned,T}, cp_neg::Integer) where T = nothing
 
 """
     cp_changesign(fmt, cp)
 
 given fmt, cp, find corresponding sign-changed code point
 """
-function cp_changesign(@no_specialize fmt::Format{is_signed,T}, cp::Integer) where T
+function cp_changesign(@nospecialize fmt::Format{is_signed,T}, cp::Integer) where T
     if cp == cp_zero(fmt) || cp == cp_nan(fmt)
         return cp
     end

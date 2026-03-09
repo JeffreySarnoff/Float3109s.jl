@@ -77,24 +77,24 @@ is_extended(fnt::Format{T,is_extended}) where T = true
 # =========================================================================
 
 """Total number of bits per code point."""
-BitwidthOf(@no_specialize fmt::Format) = fmt.K
+BitwidthOf(@nospecialize fmt::Format) = fmt.K
 
 """Precision: number of significand bits including the implicit leading bit."""
-PrecisionOf(@no_specialize fmt::Format) = fmt.P
+PrecisionOf(@nospecialize fmt::Format) = fmt.P
 
 """Number of trailing significand bits (`P - 1`)."""
-TrailingBitsOf(@no_specialize fmt::Format) = fmt.P - 1
+TrailingBitsOf(@nospecialize fmt::Format) = fmt.P - 1
 
 """Number of sign bits: `0` for unsigned, `1` for signed."""
-SignBitsOf(@no_specialize fmt::Format) = 0 + is_signed(fmt)
+SignBitsOf(@nospecialize fmt::Format) = 0 + is_signed(fmt)
 
 """Number of non-significand bits (`K - P`)."""
-NonSignificantBitsOf(@no_specialize fmt::Format) = BitwidthOf(fmt) - PrecisionOf(fmt)
+NonSignificantBitsOf(@nospecialize fmt::Format) = BitwidthOf(fmt) - PrecisionOf(fmt)
 
 """Exponent field width in bits. Unsigned: `K - P + 1`. Signed: `K - P`."""
-ExponentBitsOf(@no_specialize fmt::Format{is_unsigned,T}) where T = NonSignificantBitsOf(fmt) + 1
-ExponentBitsOf(@no_specialize fmt::Format{is_signed,T}) where T = NonSignificantBitsOf(fmt)
+ExponentBitsOf(@nospecialize fmt::Format{is_unsigned,T}) where T = NonSignificantBitsOf(fmt) + 1
+ExponentBitsOf(@nospecialize fmt::Format{is_signed,T}) where T = NonSignificantBitsOf(fmt)
 
 """Exponent bias `B`. Unsigned: `2^(K-P)`. Signed: `2^(K-P-1)`."""
-ExponentBiasOf(@no_specialize fmt::Format{is_unsigned,T}) where T = UInt128(1) << NonSignificantBitsOf(fmt)
-ExponentBiasOf(@no_specialize fmt::Format{is_signed,T}) where T = UInt128(1) << (NonSignificantBitsOf(fmt) - 1)
+ExponentBiasOf(@nospecialize fmt::Format{is_unsigned,T}) where T = UInt128(1) << NonSignificantBitsOf(fmt)
+ExponentBiasOf(@nospecialize fmt::Format{is_signed,T}) where T = UInt128(1) << (NonSignificantBitsOf(fmt) - 1)

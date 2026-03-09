@@ -5,12 +5,12 @@
 Offset between the positive and negative halves of the code-point space.
 Returns `0` for unsigned formats.
 """
-sign_half_offset(@no_specialize fmt::Format{is_unsigned,T}) where T = 0
-sign_half_offset(@no_specialize fmt::Format{is_signed,T}) where T = twopow(BitwidthOf(fmt) - 1)
+sign_half_offset(@nospecialize fmt::Format{is_unsigned,T}) where T = 0
+sign_half_offset(@nospecialize fmt::Format{is_signed,T}) where T = twopow(BitwidthOf(fmt) - 1)
 
 """Signed offset for code-point arithmetic: `0` (unsigned) or `1 - 2^(K-1)` (signed)."""
-sign_offset(@no_specialize fmt::Format{is_unsigned,T}) where T = 0
-sign_offset(@no_specialize fmt::Format{is_signed,T}) where T = 1 - twopow(BitwidthOf(fmt) - 1)
+sign_offset(@nospecialize fmt::Format{is_unsigned,T}) where T = 0
+sign_offset(@nospecialize fmt::Format{is_signed,T}) where T = 1 - twopow(BitwidthOf(fmt) - 1)
 
 """
     sign_reduce(fmt, cp)
@@ -24,9 +24,9 @@ Returns a named tuple `(s, cp_abs)` where
 
 For signed formats, the midpoint is reserved for NaN and is rejected here.
 """
-sign_reduce(@no_specialize fmt::Format{is_unsigned,T}, cp::Integer) where T = (s=0, cp_abs=cp)
+sign_reduce(@nospecialize fmt::Format{is_unsigned,T}, cp::Integer) where T = (s=0, cp_abs=cp)
 
-function sign_reduce(@no_specialize fmt::Format{is_signed,T}, cp::Integer) where T
+function sign_reduce(@nospecialize fmt::Format{is_signed,T}, cp::Integer) where T
     H = Int(sign_half_offset(fmt))
     cp < H && return (; s=0, cp_abs=cp)
     cp > H && return (; s=1, cp_abs=cp - H)
@@ -42,5 +42,5 @@ significand_scale(fmt::Format) = twopow(TrailingBitsOf(fmt))
 
 
 """Machine epsilon `2^(1-P)` for the format."""
-EpsilonOf(@no_specialize fmt::Format) = twopow(1 - PrecisionOf(fmt))
-Base.eps(@no_specialize fmt::Format) = EpsilonOf(fmt)
+EpsilonOf(@nospecialize fmt::Format) = twopow(1 - PrecisionOf(fmt))
+Base.eps(@nospecialize fmt::Format) = EpsilonOf(fmt)

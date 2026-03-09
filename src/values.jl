@@ -11,7 +11,7 @@ Return the exact rational value of code point `cp` in format `fmt`.
 
 For finite numerical code points, the result is an exact dyadic rational.
 """
-function ValueOf(@no_specialize(fmt::Format), cp::Integer)
+function ValueOf(@nospecialize(fmt::Format), cp::Integer)
     0 <= cp <= cp_max(fmt) || throw(ArgumentError("code point $cp out of range [0, $(cp_max(fmt))]"))
 
     cp == cp_zero(fmt) && return Rational{BigInt}(0)
@@ -40,7 +40,7 @@ Subnormal (`cp_abs < m`):  value = cp_abs · twopow(2 − P − B)
 Normal    (`cp_abs ≥ m`):  e = cp_abs ÷ m,  t = cp_abs mod m,  k = e − B
                            value = twopowk + t · twopow(k + 1 − P)
 """
-function _decode_positive_half(@no_specialize(fmt::Format), cp_abs::Integer)
+function _decode_positive_half(@nospecialize(fmt::Format), cp_abs::Integer)
     P = PrecisionOf(fmt)
     B = BigInt(ExponentBiasOf(fmt))
     m = BigInt(significand_scale(fmt))      # twopow(P-1)
@@ -68,7 +68,7 @@ end
 Return the exact rational values for every finite numerical code point
 in `fmt`, in code-point order.  Zero is included; NaN and ±Inf are excluded.
 """
-function AllFiniteValuesOf(@no_specialize(fmt::Format))
+function AllFiniteValuesOf(@nospecialize(fmt::Format))
     vals = Rational{BigInt}[]
     sizehint!(vals, Int(nFiniteValuesOf(fmt)) + 1)
 
@@ -91,7 +91,7 @@ end
 Return the exact rational values for every positive finite code point
 in `fmt`, in code-point order.  Zero is excluded.
 """
-function AllPositiveFiniteValuesOf(@no_specialize(fmt::Format))
+function AllPositiveFiniteValuesOf(@nospecialize(fmt::Format))
     vals = Rational{BigInt}[]
     sizehint!(vals, Int(nPosFiniteValuesOf(fmt)))
 
@@ -122,7 +122,7 @@ ordered by increasing magnitude.
 `i = 1` is the smallest positive value, `i = nPosFiniteValuesOf(fmt)` is
 the largest.
 """
-function ValueOfOrdinalPos(@no_specialize(fmt::Format), i::Integer)
+function ValueOfOrdinalPos(@nospecialize(fmt::Format), i::Integer)
     n = nPosFiniteValuesOf(fmt)
     1 <= i <= n || throw(ArgumentError("ordinal $i out of range [1, $n]"))
     cp = BigInt(cp_zero(fmt)) + BigInt(i)
@@ -138,12 +138,12 @@ closest to zero).
 
 Only valid for signed formats.
 """
-function ValueOfOrdinalNeg(@no_specialize(fmt::Format{is_signed,T}), i::Integer) where T
+function ValueOfOrdinalNeg(@nospecialize(fmt::Format{is_signed,T}), i::Integer) where T
     n = nNegFiniteValuesOf(fmt)
     1 <= i <= n || throw(ArgumentError("ordinal $i out of range [1, $n]"))
     cp = BigInt(cp_nan(fmt)) + BigInt(i)
     return ValueOf(fmt, cp)
 end
 
-ValueOfOrdinalNeg(@no_specialize(fmt::Format{is_unsigned,T}), i::Integer) where T =
+ValueOfOrdinalNeg(@nospecialize(fmt::Format{is_unsigned,T}), i::Integer) where T =
     throw(ArgumentError("unsigned formats have no negative values"))

@@ -38,7 +38,7 @@ end
 
 Exact value of the smallest positive normal: `2^(1 - B)`.
 """
-val_pos_normal_min(fmt::Format) where T = twopow(1 - ExponentBiasOf(fmt))
+val_pos_normal_min(fmt::Format) = twopow(1 - ExponentBiasOf(fmt))
 
 
 """
@@ -77,4 +77,5 @@ function val_pos_normal_max(fmt::Format{is_unsigned,is_extended})
         twopow(ExponentBiasOf(fmt) - 3)
     end
 end
+
 

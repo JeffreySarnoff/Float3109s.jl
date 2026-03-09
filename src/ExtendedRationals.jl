@@ -88,13 +88,13 @@ function ExtendedRational(x::AbstractFloat)
     end
 end
 
-Base.NaN(::Type{ExtendedRational})  = ExtendedRational(0, 0)
-Base.Inf(::Type{ExtendedRational})  = ExtendedRational(1, 0)
-NegInf(::Type{ExtendedRational})    = ExtendedRational(-1, 0)
+# ExtendedRational(NaN) = ExtendedRational(0, 0)
+# ExtendedRational(Inf) = ExtendedRational(1, 0)
+# ExtendedRational(NegInf) = ExtendedRational(-1, 0)
 
-Base.NaN(::ExtendedRational)  = NaN(ExtendedRational)
-Base.Inf(::ExtendedRational)  = Inf(ExtendedRational)
-NegInf(::ExtendedRational)    = NegInf(ExtendedRational)
+# Base.NaN(::ExtendedRational)  = ExtendedRational(0,0)
+# Base.Inf(::ExtendedRational)  = ExtendedRational(1,0)
+# NegInf(::ExtendedRational)    = ExtendedRational(-1,0)
 
 # -----------------------------------------------------------------------------
 # predicates and simple structure
@@ -168,7 +168,7 @@ function Base.hash(q::ExtendedRational, h::UInt)
     if isnan(q)
         return hash((:ExtendedRational, :NaN), h)
     elseif isinf(q)
-        return hash((:ExtendedRational, signbit(q) ? :-Inf : :Inf), h)
+        return hash((:ExtendedRational, signbit(q) ? -Inf : Inf), h)
     else
         return hash((:ExtendedRational, q.num, q.den), h)
     end
@@ -258,7 +258,7 @@ function Base.inv(q::ExtendedRational)
 end
 
 Base.:/(a::ExtendedRational, b::ExtendedRational) = a * inv(b)
-Base.:(÷)(a::ExtendedRational, b::ExtendedRational) = div(a, b)
+# Base.:(÷)(a::ExtendedRational, b::ExtendedRational) = div(a, b)
 
 function Base.:^(q::ExtendedRational, n::Integer)
     n == 0  && return one(ExtendedRational)       # q^0 = 1 for all q (IEEE convention)

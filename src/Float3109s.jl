@@ -45,6 +45,10 @@ export Format, Signedness, Domain,
 setprecision(BigFloat, 1024)
 
 include("ExtendedRationals.jl")
+using .ExtendedRationals: ExtendedRational, NegInf
+ExtendendRational = .ExtendedRationals.ExtendedRational
+NegInf = .ExtendedRationals.NegInf
+
 include("support.jl")
 include("types.jl")
 include("utils.jl")

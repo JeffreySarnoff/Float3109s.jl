@@ -3,7 +3,7 @@ import Base: NaN, Inf, +, -, *, ÷, /, ^,
     fld, mod, fldmod, fld1, mod1, fldmod1,
     cld, gcd, lcm,
     iszero, isone, isfinite, isnan, signbit, convert,
-    numerator, denominator, Tuple
+    numerator, denominator, Tuple, string, show
 
 """
     ClosedRational
@@ -38,8 +38,8 @@ struct ClosedRational <: Real
     end
 end
 
-numerator(q::ClosedRational) = q.num
-denominator(q::ClosedRational) = q.den
+Base.numerator(q::ClosedRational) = q.num
+Base.denominator(q::ClosedRational) = q.den
 
 Base.Tuple(q::ClosedRational) = (q.num, q.den)
 
@@ -96,7 +96,7 @@ Base.(-)(q::ClosedRational) = ClosedRational(-q.num, q.den)
 
 # addition
 
-function +(a::ClosedRational, b::ClosedRational)
+function Base.(+)(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b)
         return NaN(ClosedRational)
     elseif !isfinite(a) && !isfinite(b)
@@ -112,7 +112,7 @@ end
 
 # subtraction
 
-function -(a::ClosedRational, b::ClosedRational)
+function Base.(-)(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b)
         return NaN(ClosedRational)
     elseif !isfinite(a) && !isfinite(b)
@@ -128,7 +128,7 @@ end
 
 # multiplication
 
-function *(a::ClosedRational, b::ClosedRational)
+function Base.(*)(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b)
         return NaN(ClosedRational)
     elseif !isfinite(a)
@@ -144,7 +144,7 @@ end
 
 # div (truncated toward zero), fld (toward -∞), cld (toward +∞)
 
-function div(a::ClosedRational, b::ClosedRational)
+function Base.div(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b) || !isfinite(a) || iszero(b)
         return NaN(ClosedRational)
     elseif !isfinite(b)
@@ -154,7 +154,7 @@ function div(a::ClosedRational, b::ClosedRational)
     end
 end
 
-function fld(a::ClosedRational, b::ClosedRational)
+function Base.fld(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b) || !isfinite(a) || iszero(b)
         return NaN(ClosedRational)
     elseif !isfinite(b)
@@ -164,7 +164,7 @@ function fld(a::ClosedRational, b::ClosedRational)
     end
 end
 
-function cld(a::ClosedRational, b::ClosedRational)
+function Base.cld(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b) || !isfinite(a) || iszero(b)
         return NaN(ClosedRational)
     elseif !isfinite(b)
@@ -177,7 +177,7 @@ end
 # rem(a, b) = a - div(a, b) * b  (sign of a)
 # mod(a, b) = a - fld(a, b) * b  (sign of b)
 
-function rem(a::ClosedRational, b::ClosedRational)
+function Base.rem(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b) || !isfinite(a) || iszero(b)
         return NaN(ClosedRational)
     elseif !isfinite(b)
@@ -187,7 +187,7 @@ function rem(a::ClosedRational, b::ClosedRational)
     end
 end
 
-function mod(a::ClosedRational, b::ClosedRational)
+function Base.mod(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b) || !isfinite(a) || iszero(b)
         return NaN(ClosedRational)
     elseif !isfinite(b)
@@ -200,22 +200,22 @@ end
 # fld1(a, b) = fld(a-1, b) + 1   (1-based floored division)
 # mod1(a, b) = mod(a-1, b) + 1   (result in [1, b] instead of [0, b))
 
-function fld1(a::ClosedRational, b::ClosedRational)
+function Base.fld1(a::ClosedRational, b::ClosedRational)
     return fld(a - ClosedRational(1), b) + ClosedRational(1)
 end
 
-function mod1(a::ClosedRational, b::ClosedRational)
+function Base.mod1(a::ClosedRational, b::ClosedRational)
     return mod(a - ClosedRational(1), b) + ClosedRational(1)
 end
 
-divrem(a::ClosedRational, b::ClosedRational) = (div(a, b), rem(a, b))
-fldmod(a::ClosedRational, b::ClosedRational) = (fld(a, b), mod(a, b))
-fldmod1(a::ClosedRational, b::ClosedRational) = (fld1(a, b), mod1(a, b))
+Base.divrem(a::ClosedRational, b::ClosedRational) = (div(a, b), rem(a, b))
+Base.fldmod(a::ClosedRational, b::ClosedRational) = (fld(a, b), mod(a, b))
+Base.fldmod1(a::ClosedRational, b::ClosedRational) = (fld1(a, b), mod1(a, b))
 
 # gcd(a/b, c/d) = gcd(a,c) / lcm(b,d)
 # lcm(a/b, c/d) = lcm(a,c) / gcd(b,d)
 
-function gcd(a::ClosedRational, b::ClosedRational)
+function Base.gcd(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b)
         return NaN(ClosedRational)
     elseif !isfinite(a) && !isfinite(b)
@@ -229,7 +229,7 @@ function gcd(a::ClosedRational, b::ClosedRational)
     end
 end
 
-function lcm(a::ClosedRational, b::ClosedRational)
+function Base.lcm(a::ClosedRational, b::ClosedRational)
     if isnan(a) || isnan(b)
         return NaN(ClosedRational)
     elseif iszero(a) || iszero(b)
@@ -238,5 +238,39 @@ function lcm(a::ClosedRational, b::ClosedRational)
         return Inf(ClosedRational)
     else
         return ClosedRational(lcm(a.num, b.num), gcd(a.den, b.den))
+    end
+end
+
+# string / show
+
+function Base.string(q::ClosedRational)
+    isnan(q) && return "NaN"
+    !isfinite(q) && return signbit(q) ? "-Inf" : "Inf"
+    return string(q.num) * "//" * string(q.den)
+end
+
+function Base.show(io::IO, q::ClosedRational)
+    if isnan(q)
+        print(io, "NaN")
+    elseif !isfinite(q)
+        print(io, signbit(q) ? "-Inf" : "Inf")
+    else
+        show(io, q.num)
+        print(io, "//")
+        show(io, q.den)
+    end
+end
+
+function Base.show(io::IO, ::MIME"text/plain", q::ClosedRational)
+    if isnan(q)
+        print(io, "ClosedRational(NaN)")
+    elseif !isfinite(q)
+        print(io, signbit(q) ? "ClosedRational(-Inf)" : "ClosedRational(Inf)")
+    else
+        print(io, "ClosedRational(")
+        show(io, q.num)
+        print(io, "//")
+        show(io, q.den)
+        print(io, ")")
     end
 end

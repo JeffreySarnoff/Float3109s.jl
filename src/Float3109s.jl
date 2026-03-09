@@ -46,8 +46,8 @@ setprecision(BigFloat, 1024)
 
 include("ExtendedRationals.jl")
 using Float3109s.ExtendedRationals: ExtendedRational, NegInf
-ExtendendRational = .ExtendedRationals.ExtendedRational
-NegInf = .ExtendedRationals.NegInf
+ExtendendRational = Float3109s.ExtendedRationals.ExtendedRational
+NegInf = Float3109s.ExtendedRationals.NegInf
 
 include("support.jl")
 include("types.jl")

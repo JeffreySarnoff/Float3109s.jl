@@ -55,6 +55,10 @@ struct Format{S<:Signedness,D<:Domain} <: FloatFormat
     P::Int
 end
 
+function Format(K::Integer, P::Integer, S::Type{Sgn}, D::Type{Dom}) where {Sgn<:Signedness, Dom<:Domain}
+    Format{S,D}(K, P)
+end
+
 """Return `true` if `fmt` is unsigned."""
 is_unsigned(fnt::Format{is_unsigned,T}) where T = true
 is_unsigned(fnt::Format{is_signed,T}) where T = false
@@ -98,3 +102,4 @@ ExponentBitsOf(@nospecialize fmt::Format{is_signed,T}) where T = NonSignificantB
 """Exponent bias `B`. Unsigned: `2^(K-P)`. Signed: `2^(K-P-1)`."""
 ExponentBiasOf(@nospecialize fmt::Format{is_unsigned,T}) where T = UInt128(1) << NonSignificantBitsOf(fmt)
 ExponentBiasOf(@nospecialize fmt::Format{is_signed,T}) where T = UInt128(1) << (NonSignificantBitsOf(fmt) - 1)
+

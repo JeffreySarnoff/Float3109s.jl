@@ -63,19 +63,21 @@ struct ExtendedRational <: Real
     end
 end
 
+const NegInf = ExtendedRational(-1, 0)
+
 # -----------------------------------------------------------------------------
 # constructors and basic accessors
 # -----------------------------------------------------------------------------
 
-Base.numerator(q::ExtendedRational)   = q.num
+Base.numerator(q::ExtendedRational) = q.num
 Base.denominator(q::ExtendedRational) = q.den
-Base.Tuple(q::ExtendedRational)       = (q.num, q.den)
+Base.Tuple(q::ExtendedRational) = (q.num, q.den)
 
 ExtendedRational(nd::Tuple{<:Integer,<:Integer}) = ExtendedRational(BigInt(nd[1]), BigInt(nd[2]))
-ExtendedRational(num::Integer, den::Integer)      = ExtendedRational(BigInt(num), BigInt(den))
-ExtendedRational(num::BigInt)                     = ExtendedRational(num, one(BigInt))
-ExtendedRational(num::Integer)                    = ExtendedRational(BigInt(num))
-ExtendedRational(x::Rational{<:Integer})          = ExtendedRational(numerator(x), denominator(x))
+ExtendedRational(num::Integer, den::Integer) = ExtendedRational(BigInt(num), BigInt(den))
+ExtendedRational(num::BigInt) = ExtendedRational(num, one(BigInt))
+ExtendedRational(num::Integer) = ExtendedRational(BigInt(num))
+ExtendedRational(x::Rational{<:Integer}) = ExtendedRational(numerator(x), denominator(x))
 
 function ExtendedRational(x::AbstractFloat)
     if isnan(x)
@@ -100,35 +102,35 @@ end
 # predicates and simple structure
 # -----------------------------------------------------------------------------
 
-@inline Base.isnan(q::ExtendedRational)    = q.den == 0 && q.num == 0
+@inline Base.isnan(q::ExtendedRational) = q.den == 0 && q.num == 0
 @inline Base.isfinite(q::ExtendedRational) = q.den != 0
-@inline Base.isinf(q::ExtendedRational)    = q.den == 0 && q.num != 0
-@inline Base.iszero(q::ExtendedRational)   = q.den != 0 && q.num == 0
-@inline Base.isone(q::ExtendedRational)    = q.den == 1 && q.num == 1
-@inline Base.signbit(q::ExtendedRational)  = q.num < 0
+@inline Base.isinf(q::ExtendedRational) = q.den == 0 && q.num != 0
+@inline Base.iszero(q::ExtendedRational) = q.den != 0 && q.num == 0
+@inline Base.isone(q::ExtendedRational) = q.den == 1 && q.num == 1
+@inline Base.signbit(q::ExtendedRational) = q.num < 0
 
-Base.zero(::Type{ExtendedRational})  = ExtendedRational(0)
-Base.zero(::ExtendedRational)        = zero(ExtendedRational)
-Base.one(::Type{ExtendedRational})   = ExtendedRational(1)
-Base.one(::ExtendedRational)         = one(ExtendedRational)
+Base.zero(::Type{ExtendedRational}) = ExtendedRational(0)
+Base.zero(::ExtendedRational) = zero(ExtendedRational)
+Base.one(::Type{ExtendedRational}) = ExtendedRational(1)
+Base.one(::ExtendedRational) = one(ExtendedRational)
 Base.oneunit(::Type{ExtendedRational}) = one(ExtendedRational)
-Base.oneunit(::ExtendedRational)       = one(ExtendedRational)
+Base.oneunit(::ExtendedRational) = one(ExtendedRational)
 
-Base.real(q::ExtendedRational)   = q
-Base.imag(::ExtendedRational)    = zero(ExtendedRational)
-Base.conj(q::ExtendedRational)   = q
+Base.real(q::ExtendedRational) = q
+Base.imag(::ExtendedRational) = zero(ExtendedRational)
+Base.conj(q::ExtendedRational) = q
 
 # -----------------------------------------------------------------------------
 # promotion and conversion
 # -----------------------------------------------------------------------------
 
-Base.convert(::Type{ExtendedRational}, q::ExtendedRational)      = q
-Base.convert(::Type{ExtendedRational}, x::Integer)               = ExtendedRational(x)
-Base.convert(::Type{ExtendedRational}, x::Rational{<:Integer})   = ExtendedRational(x)
-Base.convert(::Type{ExtendedRational}, x::AbstractFloat)         = ExtendedRational(x)
+Base.convert(::Type{ExtendedRational}, q::ExtendedRational) = q
+Base.convert(::Type{ExtendedRational}, x::Integer) = ExtendedRational(x)
+Base.convert(::Type{ExtendedRational}, x::Rational{<:Integer}) = ExtendedRational(x)
+Base.convert(::Type{ExtendedRational}, x::AbstractFloat) = ExtendedRational(x)
 
-Base.promote_rule(::Type{ExtendedRational}, ::Type{<:Integer})     = ExtendedRational
-Base.promote_rule(::Type{ExtendedRational}, ::Type{<:Rational})    = ExtendedRational
+Base.promote_rule(::Type{ExtendedRational}, ::Type{<:Integer}) = ExtendedRational
+Base.promote_rule(::Type{ExtendedRational}, ::Type{<:Rational}) = ExtendedRational
 Base.promote_rule(::Type{ExtendedRational}, ::Type{<:AbstractFloat}) = ExtendedRational
 
 function Base.convert(::Type{Rational{BigInt}}, q::ExtendedRational)
@@ -195,9 +197,9 @@ function Base.isless(a::ExtendedRational, b::ExtendedRational)
     end
 end
 
-Base.:<(a::ExtendedRational, b::ExtendedRational)  = isless(a, b)
+Base.:<(a::ExtendedRational, b::ExtendedRational) = isless(a, b)
 Base.:<=(a::ExtendedRational, b::ExtendedRational) = !isless(b, a)
-Base.:>(a::ExtendedRational, b::ExtendedRational)  = isless(b, a)
+Base.:>(a::ExtendedRational, b::ExtendedRational) = isless(b, a)
 Base.:>=(a::ExtendedRational, b::ExtendedRational) = !isless(a, b)
 
 # -----------------------------------------------------------------------------
@@ -205,10 +207,10 @@ Base.:>=(a::ExtendedRational, b::ExtendedRational) = !isless(a, b)
 # -----------------------------------------------------------------------------
 
 function _add_finite(a::ExtendedRational, b::ExtendedRational)
-    g  = gcd(a.den, b.den)
+    g = gcd(a.den, b.den)
     ad = div(a.den, g)
     bd = div(b.den, g)
-    n  = a.num * bd + b.num * ad
+    n = a.num * bd + b.num * ad
     iszero(n) && return zero(ExtendedRational)
     gn = gcd(abs(n), g)
     return ExtendedRational(div(n, gn), ad * div(b.den, gn))
@@ -217,8 +219,10 @@ end
 function _mul_finite(a::ExtendedRational, b::ExtendedRational)
     g1 = gcd(abs(a.num), b.den)
     g2 = gcd(abs(b.num), a.den)
-    n1 = div(a.num, g1);  d1 = div(a.den, g2)
-    n2 = div(b.num, g2);  d2 = div(b.den, g1)
+    n1 = div(a.num, g1)
+    d1 = div(a.den, g2)
+    n2 = div(b.num, g2)
+    d2 = div(b.den, g1)
     return ExtendedRational(n1 * n2, d1 * d2)
 end
 
@@ -227,33 +231,33 @@ end
 # -----------------------------------------------------------------------------
 
 Base.abs(q::ExtendedRational) = isnan(q) ? NaN(q) : ExtendedRational(abs(q.num), q.den)
-Base.:+(q::ExtendedRational)  = q
-Base.:-(q::ExtendedRational)  = ExtendedRational(-q.num, q.den)
+Base.:+(q::ExtendedRational) = q
+Base.:-(q::ExtendedRational) = ExtendedRational(-q.num, q.den)
 
 function Base.:+(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b)              && return NaN(ExtendedRational)
-    isinf(a) && isinf(b)             && return signbit(a) == signbit(b) ? a : NaN(ExtendedRational)
-    isinf(a)                          && return a
-    isinf(b)                          && return b
+    isnan(a) || isnan(b) && return NaN(ExtendedRational)
+    isinf(a) && isinf(b) && return signbit(a) == signbit(b) ? a : NaN(ExtendedRational)
+    isinf(a) && return a
+    isinf(b) && return b
     return _add_finite(a, b)
 end
 
 Base.:-(a::ExtendedRational, b::ExtendedRational) = a + (-b)
 
 function Base.:*(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b)                         && return NaN(ExtendedRational)
+    isnan(a) || isnan(b) && return NaN(ExtendedRational)
     (isinf(a) && iszero(b)) || (isinf(b) && iszero(a)) && return NaN(ExtendedRational)
-    (isinf(a) || isinf(b))                       && return signbit(a) != signbit(b) ?
-                                                        NegInf(ExtendedRational) : Inf(ExtendedRational)
+    (isinf(a) || isinf(b)) && return signbit(a) != signbit(b) ?
+                                     NegInf(ExtendedRational) : Inf(ExtendedRational)
     return _mul_finite(a, b)
 end
 
 function Base.inv(q::ExtendedRational)
-    isnan(q)  && return NaN(ExtendedRational)
+    isnan(q) && return NaN(ExtendedRational)
     # Canonical zero has num == 0 and den == 1, so signbit(q) == false.
     # There is no negative-zero representation; inv(0) is always +Inf.
     iszero(q) && return Inf(ExtendedRational)
-    isinf(q)  && return zero(ExtendedRational)
+    isinf(q) && return zero(ExtendedRational)
     return ExtendedRational(q.den, q.num)
 end
 
@@ -261,8 +265,8 @@ Base.:/(a::ExtendedRational, b::ExtendedRational) = a * inv(b)
 # Base.:(÷)(a::ExtendedRational, b::ExtendedRational) = div(a, b)
 
 function Base.:^(q::ExtendedRational, n::Integer)
-    n == 0  && return one(ExtendedRational)       # q^0 = 1 for all q (IEEE convention)
-    n < 0   && return inv(q)^(-n)
+    n == 0 && return one(ExtendedRational)       # q^0 = 1 for all q (IEEE convention)
+    n < 0 && return inv(q)^(-n)
     isnan(q) && return NaN(ExtendedRational)
     if isinf(q)
         # n > 0 is guaranteed here (n == 0 and n < 0 handled above).
@@ -309,11 +313,11 @@ function Base.mod(a::ExtendedRational, b::ExtendedRational)
     return a - fld(a, b) * b
 end
 
-Base.fld1(a::ExtendedRational, b::ExtendedRational)  = fld(a - one(ExtendedRational), b) + one(ExtendedRational)
-Base.mod1(a::ExtendedRational, b::ExtendedRational)  = mod(a - one(ExtendedRational), b) + one(ExtendedRational)
+Base.fld1(a::ExtendedRational, b::ExtendedRational) = fld(a - one(ExtendedRational), b) + one(ExtendedRational)
+Base.mod1(a::ExtendedRational, b::ExtendedRational) = mod(a - one(ExtendedRational), b) + one(ExtendedRational)
 
-Base.divrem(a::ExtendedRational, b::ExtendedRational)  = (div(a, b),  rem(a, b))
-Base.fldmod(a::ExtendedRational, b::ExtendedRational)  = (fld(a, b),  mod(a, b))
+Base.divrem(a::ExtendedRational, b::ExtendedRational) = (div(a, b), rem(a, b))
+Base.fldmod(a::ExtendedRational, b::ExtendedRational) = (fld(a, b), mod(a, b))
 Base.fldmod1(a::ExtendedRational, b::ExtendedRational) = (fld1(a, b), mod1(a, b))
 
 # -----------------------------------------------------------------------------
@@ -332,10 +336,10 @@ For non-finite values a closure policy is used:
 - `gcd(±Inf, x_finite) = abs(x_finite)`
 """
 function Base.gcd(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b)   && return NaN(ExtendedRational)
-    isinf(a) && isinf(b)  && return Inf(ExtendedRational)
-    isinf(a)               && return abs(b)
-    isinf(b)               && return abs(a)
+    isnan(a) || isnan(b) && return NaN(ExtendedRational)
+    isinf(a) && isinf(b) && return Inf(ExtendedRational)
+    isinf(a) && return abs(b)
+    isinf(b) && return abs(a)
     return ExtendedRational(gcd(a.num, b.num), lcm(a.den, b.den))
 end
 
@@ -351,9 +355,9 @@ For non-finite values a closure policy is used:
 - `lcm(±Inf, x)` is `+Inf` when `x ≠ 0`
 """
 function Base.lcm(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b)        && return NaN(ExtendedRational)
-    iszero(a) || iszero(b)      && return zero(ExtendedRational)
-    isinf(a) || isinf(b)       && return Inf(ExtendedRational)
+    isnan(a) || isnan(b) && return NaN(ExtendedRational)
+    iszero(a) || iszero(b) && return zero(ExtendedRational)
+    isinf(a) || isinf(b) && return Inf(ExtendedRational)
     return ExtendedRational(lcm(a.num, b.num), gcd(a.den, b.den))
 end
 
@@ -421,8 +425,8 @@ Special case `x ∈ {0, -1}` both require 1 bit.
 function bitlen_signed(x::Integer)::Int
     # 1-bit signed range is [-1, 0]; handle both endpoints explicitly.
     (x == 0 || x == -1) && return 1
-    x > 0 && return ndigits(x;      base=2) + 1
-    return     ndigits(-x - 1; base=2) + 1   # x < -1
+    x > 0 && return ndigits(x; base=2) + 1
+    return ndigits(-x - 1; base=2) + 1   # x < -1
 end
 
 """
@@ -467,10 +471,10 @@ of `r` as a reduced rational.
 function required_bits(r::Rational)
     p, q = reduced_num_den(r)
     return (
-        numerator     = p,
-        denominator   = q,
-        unsigned_bits = required_bits_unsigned(r),
-        signed_bits   = required_bits_signed(r),
+        numerator=p,
+        denominator=q,
+        unsigned_bits=required_bits_unsigned(r),
+        signed_bits=required_bits_signed(r),
     )
 end
 
@@ -514,7 +518,7 @@ Return reduced rational and bit requirements for a binary-expression rational.
 """
 function required_bits_binary_form(num_terms, den_terms)
     r = dyadic_rational(num_terms, den_terms)
-    return (rational = r, required_bits(r)...)
+    return (rational=r, required_bits(r)...)
 end
 
 #=

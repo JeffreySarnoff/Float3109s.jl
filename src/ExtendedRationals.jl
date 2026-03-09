@@ -1,6 +1,6 @@
-module ExtendedRationals
+# module ExtendedRationals
 
-export ExtendedRational, NegInf
+# export ExtendedRational, NegInf
 
 import Base: NaN, Inf,
     +, -, *, /, ÷, ^,
@@ -545,4 +545,4 @@ r3info = required_bits_binary_form([(1,10), (1,6)], [(1,12)])
 @show r3info
 =#
 
-end # module ExtendedRationals
+# end # module ExtendedRationals

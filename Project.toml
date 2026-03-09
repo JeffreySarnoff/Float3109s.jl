@@ -1,0 +1,15 @@
+name = "Float3109s"
+uuid = "7e46e1f0-77ad-4bc7-9f88-2f15201e2d6b"
+authors = ["Jeffrey Sarnoff <jeffrey.sarnoff@ieee.com>"]
+version = "0.1.0"
+
+[compat]
+julia = "1.12"
+Documenter = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+
+[targets]
+test = ["Test"]

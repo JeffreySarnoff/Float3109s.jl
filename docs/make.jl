@@ -13,8 +13,8 @@ makedocs(
         "Concepts" => "concepts.md",
         "Guide" => [
             "Formats" => "formats.md",
-            "ClosedRational" => "closedrationals.md",
-            "Counts"  => "counts.md",
+            "ExtendedRational" => "ExtendedRationals.md",
+            "Counts" => "counts.md",
             "Code Points" => "codepoints.md",
             "Values" => "values.md",
         ],

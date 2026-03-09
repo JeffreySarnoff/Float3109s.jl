@@ -1,13 +1,13 @@
 # Values
 
 The functions in `floatvalues.jl` and `values.jl` decode code points into
-their exact rational values as `ClosedRational` values (see
-[ClosedRational](@ref) for the type definition).
+their exact rational values as `ExtendedRational` values (see
+[ExtendedRational](@ref) for the type definition).
 
 ## Decoding a single code point
 
 ```julia
-FiniteValueOf(fmt, cp) -> ClosedRational
+FiniteValueOf(fmt, cp) -> ExtendedRational
 ```
 
 Returns the exact value of code point `cp` in format `fmt`.
@@ -81,7 +81,7 @@ val_ordinal_ith_pos_subnormal(fmt, i) = i * 2^(2 - P - B)
 ### All finite values
 
 ```julia
-AllFiniteValuesOf(fmt) -> Vector{ClosedRational}
+AllFiniteValuesOf(fmt) -> Vector{ExtendedRational}
 ```
 
 Returns every finite value in code-point order.  Zero is included; NaN and
@@ -91,7 +91,7 @@ infinities are excluded.  For signed formats, the order is:
 ### Positive finite values only
 
 ```julia
-AllPositiveFiniteValuesOf(fmt) -> Vector{ClosedRational}
+AllPositiveFiniteValuesOf(fmt) -> Vector{ExtendedRational}
 ```
 
 Returns every positive finite value in code-point order.  Zero is excluded.
@@ -156,7 +156,7 @@ v2 == 2 * v1   # true
 fmt = Format{is_unsigned, is_finite}(3, 2)
 
 AllFiniteValuesOf(fmt)
-# 7-element Vector{ClosedRational}:
+# 7-element Vector{ExtendedRational}:
 #  0//1  1//4  1//2  3//4  1//1  3//2  2//1
 ```
 

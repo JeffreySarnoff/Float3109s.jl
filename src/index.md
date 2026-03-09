@@ -12,7 +12,7 @@ precision `P` — together with a signedness and domain choice — the package c
 - **Count** every class of value (normals, subnormals, infinities, ...)
 - **Locate** the code point of any boundary value (smallest subnormal,
   largest normal, NaN, ±Inf, ...)
-- **Decode** any code point to its exact rational value using `ClosedRational`
+- **Decode** any code point to its exact rational value using `ExtendedRational`
 - **Enumerate** every representable value for small formats
 
 All arithmetic is exact.  There is no rounding and no floating-point
@@ -51,7 +51,7 @@ AllPositiveFiniteValuesOf(fmt)  # every positive finite value, in order
 
 | Source file           | Purpose                                                             |
 |:----------------------|:--------------------------------------------------------------------|
-| `closedrationals.jl`  | `ClosedRational` exact rational type with NaN/±Inf support          |
+| `ExtendedRationals.jl`  | `ExtendedRational` exact rational type with NaN/±Inf support          |
 | `types.jl`            | `Format` type, signedness/domain traits, accessors                  |
 | `support.jl`          | `twopow`, `dyadic_twopow` -- exact power-of-two helpers            |
 | `utils.jl`            | `sign_half_offset`, `sign_reduce`, `significand_scale`, `EpsilonOf` |

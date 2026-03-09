@@ -57,3 +57,6 @@ val_pos_normal_max(fmt::Format{is_signed,is_finite}) =
 val_pos_normal_max(fmt::Format{is_signed,is_extended}) =
     (twopow(twopow(ExponentBiasOf(fmt)) - 1)) * (2 - twopow(2 - PrecisionOf(fmt)))
 
+
+
+

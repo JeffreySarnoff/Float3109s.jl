@@ -38,9 +38,10 @@ export Format, Signedness, Domain,
     val_neg_subnormal_min, val_neg_subnormal_max,
     val_pos_normal_min, val_pos_normal_max,
     val_neg_normal_min, val_neg_normal_max,
-    ValueOf, ValueOfOrdinalPos, ValueOfOrdinalNeg,
+    FiniteValueOf, FiniteValueOfOrdinalPos, FiniteValueOfOrdinalNeg,
     AllFiniteValuesOf, AllPositiveFiniteValuesOf
 
+include("closedrationals.jl")
 include("support.jl")
 include("types.jl")
 include("utils.jl")

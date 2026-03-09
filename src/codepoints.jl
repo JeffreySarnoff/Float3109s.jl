@@ -165,12 +165,12 @@ function cp_is_positive(@nospecialize(fmt::Format), cp::Integer)
 end
 
 """Return `true` if `cp` is a non-negative code point (zero or positive)."""
-function cp_is_nonnegative(@nospecialize fmt::Format, cp::Integer)
+function cp_is_nonnegative(@nospecialize(fmt::Format), cp::Integer)
     cp_zero(fmt) <= cp < cp_nan(fmt)
 end
 
 """Return `true` if `cp` is a negative code point. Always `false` for unsigned formats."""
-cp_is_negative(@nospecialize fmt::Format{is_unsigned,T}, cp::Integer) where T = false
+cp_is_negative(@nospecialize(fmt::Format{is_unsigned,T}), cp::Integer) where T = false
 function cp_is_negative(@nospecialize(fmt::Format{is_signed,T}), cp::Integer) where T
     cp > cp_nan(fmt)
 end
@@ -222,4 +222,5 @@ function cp_changesign(@nospecialize(fmt::Format{is_signed,T}), cp::Integer) whe
         unsafe_neg_cp_to_pos_cp(fmt, cp)
     end
 end
+
 

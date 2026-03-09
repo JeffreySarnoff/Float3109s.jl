@@ -24,9 +24,9 @@ Returns a named tuple `(s, cp_abs)` where
 
 For signed formats, the midpoint is reserved for NaN and is rejected here.
 """
-sign_reduce(@nospecialize fmt::Format{is_unsigned,T}, cp::Integer) where T = (s=0, cp_abs=cp)
+sign_reduce(@nospecialize(fmt::Format{is_unsigned,T}), cp::Integer) where T = (s=0, cp_abs=cp)
 
-function sign_reduce(@nospecialize fmt::Format{is_signed,T}, cp::Integer) where T
+function sign_reduce(@nospecialize(fmt::Format{is_signed,T}), cp::Integer) where T
     H = Int(sign_half_offset(fmt))
     cp < H && return (; s=0, cp_abs=cp)
     cp > H && return (; s=1, cp_abs=cp - H)
@@ -43,4 +43,5 @@ significand_scale(fmt::Format) = twopow(TrailingBitsOf(fmt))
 
 """Machine epsilon `2^(1-P)` for the format."""
 EpsilonOf(@nospecialize fmt::Format) = twopow(1 - PrecisionOf(fmt))
+
 Base.eps(@nospecialize fmt::Format) = EpsilonOf(fmt)

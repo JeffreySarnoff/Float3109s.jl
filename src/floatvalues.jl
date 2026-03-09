@@ -58,15 +58,6 @@ val_pos_normal_max(fmt::Format{is_signed,is_finite}) =
 val_pos_normal_max(fmt::Format{is_signed,is_extended}) =
     (twopow(twopow(ExponentBiasOf(fmt)) - 1)) * (2 - twopow(2 - PrecisionOf(fmt)))
 
-function val_pos_normal_max(fmt::Format{is_signed,is_extended})
-    P = PrecisionOf(fmt)
-    if P >= 2
-        (twopow(P) - 2) * twopow(ExponentBiasOf(fmt) - P)
-    else # P == 1
-        twopow(ExponentBiasOf(fmt) - 2)
-    end
-end
-
 function val_pos_normal_max(fmt::Format{is_unsigned,is_extended})
     P = PrecisionOf(fmt)
     if P >= 3
@@ -77,5 +68,6 @@ function val_pos_normal_max(fmt::Format{is_unsigned,is_extended})
         twopow(ExponentBiasOf(fmt) - 3)
     end
 end
+
 
 

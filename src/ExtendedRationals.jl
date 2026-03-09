@@ -258,7 +258,7 @@ function Base.inv(q::ExtendedRational)
 end
 
 Base.:/(a::ExtendedRational, b::ExtendedRational) = a * inv(b)
-Base.:(÷)(a::ExtendedRational, b::ExtendedRational) = div(a, b)
+# Base.:(÷)(a::ExtendedRational, b::ExtendedRational) = div(a, b)
 
 function Base.:^(q::ExtendedRational, n::Integer)
     n == 0  && return one(ExtendedRational)       # q^0 = 1 for all q (IEEE convention)

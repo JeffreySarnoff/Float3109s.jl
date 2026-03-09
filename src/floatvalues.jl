@@ -40,7 +40,6 @@ Exact value of the smallest positive normal: `2^(1 - B)`.
 """
 val_pos_normal_min(fmt::Format) = twopow(1 - ExponentBiasOf(fmt))
 
-
 """
     val_pos_normal_max(fmt)
 
@@ -58,16 +57,6 @@ val_pos_normal_max(fmt::Format{is_signed,is_finite}) =
 val_pos_normal_max(fmt::Format{is_signed,is_extended}) =
     (twopow(twopow(ExponentBiasOf(fmt)) - 1)) * (2 - twopow(2 - PrecisionOf(fmt)))
 
-function val_pos_normal_max(fmt::Format{is_unsigned,is_extended})
-    P = PrecisionOf(fmt)
-    if P >= 3
-        (twopow(P) - 3) * twopow(ExponentBiasOf(fmt) - P)
-    elseif P == 2
-        3 * twopow(ExponentBiasOf(fmt) - 3)
-    else # P == 1
-        twopow(ExponentBiasOf(fmt) - 3)
-    end
-end
 
 
 

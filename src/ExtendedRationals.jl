@@ -88,13 +88,13 @@ function ExtendedRational(x::AbstractFloat)
     end
 end
 
-ExtendedRational(NaN) = ExtendedRational(0, 0)
-ExtendedRational(Inf) = ExtendedRational(1, 0)
-ExtendedRational(NegInf) = ExtendedRational(-1, 0)
+# ExtendedRational(NaN) = ExtendedRational(0, 0)
+# ExtendedRational(Inf) = ExtendedRational(1, 0)
+# ExtendedRational(NegInf) = ExtendedRational(-1, 0)
 
-Base.NaN(::ExtendedRational)  = ExtendedRational(NaN)
-Base.Inf(::ExtendedRational)  = ExtendedRational(Inf)
-NegInf(::ExtendedRational)    = ExtendedRational(-Inf)
+Base.NaN(::ExtendedRational)  = ExtendedRational(0,0)
+Base.Inf(::ExtendedRational)  = ExtendedRational(1,0)
+NegInf(::ExtendedRational)    = ExtendedRational(-1,0)
 
 # -----------------------------------------------------------------------------
 # predicates and simple structure

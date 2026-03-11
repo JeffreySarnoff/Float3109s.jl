@@ -13,9 +13,14 @@ The implementation emphasizes:
 """
 module Float3109s
 
-export Format, Signedness, Domain,
-    is_signed, is_unsigned, is_finite, is_extended,
+export
+    FormatTraits,
+    Signedness, UnsignedFormat, SignedFormat,
+    IsUnsigned, IsSigned, is_signed, is_unsigned,
+    Domain, FiniteFormat, ExtendedFormat,
+    IsFinite, IsExtended, is_finite, is_extended,
     ExtendedRational, NegInf,
+    Format,
     BitwidthOf, PrecisionOf, TrailingBitsOf, SignBitsOf,
     NonSignificantBitsOf, ExponentBitsOf, ExponentBiasOf,
     EpsilonOf,
@@ -44,10 +49,9 @@ export Format, Signedness, Domain,
 
 setprecision(BigFloat, 1024)
 
-include("ExtendedRationals.jl")
-
 include("support.jl")
-include("types.jl")
+include("typing/traits.jl")
+include("typing/types.jl")
 include("utils.jl")
 include("counts.jl")
 include("codepoints.jl")

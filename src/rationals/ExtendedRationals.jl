@@ -16,11 +16,11 @@ import Base: NaN, Inf,
     real, imag, conj
 
 """
-    ExtendedRational <: Real
+    ExtendedRational{I<:Integer} <: Real
 
 Exact rational number type closed under IEEE-style special values.
 
-Stored as a pair of `BigInt` fields `(num, den)` with canonical forms:
+Stored as a pair of `I` fields `(num, den)` with canonical forms:
 
 - finite: `num//den` with `gcd(num, den) == 1` and `den > 0`
 - zero: `0//1`
@@ -28,38 +28,43 @@ Stored as a pair of `BigInt` fields `(num, den)` with canonical forms:
 - `-Inf`: `-1//0`
 - `NaN`: `0//0`
 
+The type parameter `I` specifies the integer type used for numerator and
+denominator (e.g. `BigInt`, `Int64`, `Int128`).
+
 This type is intended to behave as a well-integrated Julia `Real` subtype.
 It provides canonical equality and hashing, total ordering via `isless`,
 promotion/conversion with common numeric types, exact finite arithmetic, and
 IEEE-style closure policies for `NaN` and infinities.
 """
-struct ExtendedRational <: Real
-    num::BigInt
-    den::BigInt
+struct ExtendedRational{I<:Integer} <: Real
+    num::I
+    den::I
 
-    function ExtendedRational(num::BigInt, den::BigInt)
+    function ExtendedRational{I}(num::I, den::I) where {I<:Integer}
         if den == 0
             if num == 0
-                return new(BigInt(0), BigInt(0))     # NaN
+                return new{I}(zero(I), zero(I))     # NaN
             elseif num > 0
-                return new(BigInt(1), BigInt(0))     # +Inf
+                return new{I}(one(I), zero(I))       # +Inf
             else
-                return new(BigInt(-1), BigInt(0))    # -Inf
+                return new{I}(-one(I), zero(I))      # -Inf
             end
         end
 
         if num == 0
-            return new(BigInt(0), BigInt(1))
+            return new{I}(zero(I), one(I))
+        end
+
+        if signbit(den)
+            num = -num
+            den = -den
         end
 
         g = gcd(num, den)
         n = div(num, g)
         d = div(den, g)
-        if d < 0
-            n = -n
-            d = -d
-        end
-        return new(n, d)
+
+        return new{I}(n, d)
     end
 end
 
@@ -71,32 +76,23 @@ Base.numerator(q::ExtendedRational) = q.num
 Base.denominator(q::ExtendedRational) = q.den
 Base.Tuple(q::ExtendedRational) = (q.num, q.den)
 
-ExtendedRational(nd::Tuple{<:Integer,<:Integer}) = ExtendedRational(BigInt(nd[1]), BigInt(nd[2]))
-ExtendedRational(num::Integer, den::Integer) = ExtendedRational(BigInt(num), BigInt(den))
-ExtendedRational(num::BigInt) = ExtendedRational(num, one(BigInt))
-ExtendedRational(num::Integer) = ExtendedRational(BigInt(num))
-ExtendedRational(x::Rational{<:Integer}) = ExtendedRational(numerator(x), denominator(x))
+ExtendedRational{I}(nd::Tuple{<:Integer,<:Integer}) where {I<:Integer} = ExtendedRational{I}(I(nd[1]), I(nd[2]))
+ExtendedRational{I}(num::Integer, den::Integer) where {I<:Integer} = ExtendedRational{I}(I(num), I(den))
+ExtendedRational{I}(num::Integer) where {I<:Integer} = ExtendedRational{I}(I(num), one(I))
+ExtendedRational{I}(x::Rational{<:Integer}) where {I<:Integer} = ExtendedRational{I}(I(numerator(x)), I(denominator(x)))
 
-function ExtendedRational(x::AbstractFloat)
+function ExtendedRational{I}(x::AbstractFloat) where {I<:Integer}
     if isnan(x)
-        return NaN(ExtendedRational)
+        return NaN(ExtendedRational{I})
     elseif isinf(x)
-        return signbit(x) ? NegInf(ExtendedRational) : Inf(ExtendedRational)
+        return signbit(x) ? NegInf(ExtendedRational{I}) : Inf(ExtendedRational{I})
     else
-        r = Rational{BigInt}(x)
-        return ExtendedRational(numerator(r), denominator(r))
+        r = Rational{I}(x)
+        return ExtendedRational{I}(numerator(r), denominator(r))
     end
 end
 
-const NegInf = ExtendedRational(-1, 0)
-
-# ExtendedRational(NaN) = ExtendedRational(0, 0)
-# ExtendedRational(Inf) = ExtendedRational(1, 0)
-# ExtendedRational(NegInf) = ExtendedRational(-1, 0)
-
-# Base.NaN(::ExtendedRational)  = ExtendedRational(0,0)
-# Base.Inf(::ExtendedRational)  = ExtendedRational(1,0)
-# NegInf(::ExtendedRational)    = ExtendedRational(-1,0)
+const NegInf = ExtendedRational{BigInt}(-1, 0)
 
 # -----------------------------------------------------------------------------
 # predicates and simple structure
@@ -109,33 +105,35 @@ const NegInf = ExtendedRational(-1, 0)
 @inline Base.isone(q::ExtendedRational) = q.den == 1 && q.num == 1
 @inline Base.signbit(q::ExtendedRational) = q.num < 0
 
-Base.zero(::Type{ExtendedRational}) = ExtendedRational(0)
-Base.zero(::ExtendedRational) = zero(ExtendedRational)
-Base.one(::Type{ExtendedRational}) = ExtendedRational(1)
-Base.one(::ExtendedRational) = one(ExtendedRational)
-Base.oneunit(::Type{ExtendedRational}) = one(ExtendedRational)
-Base.oneunit(::ExtendedRational) = one(ExtendedRational)
+Base.zero(::Type{ExtendedRational{I}}) where {I<:Integer} = ExtendedRational{I}(zero(I))
+Base.zero(::ExtendedRational{I}) where {I<:Integer} = zero(ExtendedRational{I})
+Base.one(::Type{ExtendedRational{I}}) where {I<:Integer} = ExtendedRational{I}(one(I))
+Base.one(::ExtendedRational{I}) where {I<:Integer} = one(ExtendedRational{I})
+Base.oneunit(::Type{ExtendedRational{I}}) where {I<:Integer} = one(ExtendedRational{I})
+Base.oneunit(::ExtendedRational{I}) where {I<:Integer} = one(ExtendedRational{I})
 
 Base.real(q::ExtendedRational) = q
-Base.imag(::ExtendedRational) = zero(ExtendedRational)
+Base.imag(::ExtendedRational{I}) where {I<:Integer} = zero(ExtendedRational{I})
 Base.conj(q::ExtendedRational) = q
 
 # -----------------------------------------------------------------------------
 # promotion and conversion
 # -----------------------------------------------------------------------------
 
-Base.convert(::Type{ExtendedRational}, q::ExtendedRational) = q
-Base.convert(::Type{ExtendedRational}, x::Integer) = ExtendedRational(x)
-Base.convert(::Type{ExtendedRational}, x::Rational{<:Integer}) = ExtendedRational(x)
-Base.convert(::Type{ExtendedRational}, x::AbstractFloat) = ExtendedRational(x)
+Base.convert(::Type{ExtendedRational{I}}, q::ExtendedRational{I}) where {I<:Integer} = q
+Base.convert(::Type{ExtendedRational{I}}, q::ExtendedRational) where {I<:Integer} = ExtendedRational{I}(I(q.num), I(q.den))
+Base.convert(::Type{ExtendedRational{I}}, x::Integer) where {I<:Integer} = ExtendedRational{I}(x)
+Base.convert(::Type{ExtendedRational{I}}, x::Rational{<:Integer}) where {I<:Integer} = ExtendedRational{I}(x)
+Base.convert(::Type{ExtendedRational{I}}, x::AbstractFloat) where {I<:Integer} = ExtendedRational{I}(x)
 
-Base.promote_rule(::Type{ExtendedRational}, ::Type{<:Integer}) = ExtendedRational
-Base.promote_rule(::Type{ExtendedRational}, ::Type{<:Rational}) = ExtendedRational
-Base.promote_rule(::Type{ExtendedRational}, ::Type{<:AbstractFloat}) = ExtendedRational
+Base.promote_rule(::Type{ExtendedRational{I}}, ::Type{<:Integer}) where {I<:Integer} = ExtendedRational{I}
+Base.promote_rule(::Type{ExtendedRational{I}}, ::Type{<:Rational}) where {I<:Integer} = ExtendedRational{I}
+Base.promote_rule(::Type{ExtendedRational{I}}, ::Type{<:AbstractFloat}) where {I<:Integer} = ExtendedRational{I}
+Base.promote_rule(::Type{ExtendedRational{I1}}, ::Type{ExtendedRational{I2}}) where {I1<:Integer, I2<:Integer} = ExtendedRational{promote_type(I1, I2)}
 
-function Base.convert(::Type{Rational{BigInt}}, q::ExtendedRational)
-    isfinite(q) || throw(DomainError(q, "cannot convert NaN or infinity to Rational{BigInt}"))
-    return numerator(q) // denominator(q)
+function Base.convert(::Type{Rational{I}}, q::ExtendedRational) where {I<:Integer}
+    isfinite(q) || throw(DomainError(q, "cannot convert NaN or infinity to Rational{$I}"))
+    return I(numerator(q)) // I(denominator(q))
 end
 
 function Base.convert(::Type{T}, q::ExtendedRational) where {T<:AbstractFloat}
@@ -165,8 +163,6 @@ function Base.isequal(a::ExtendedRational, b::ExtendedRational)
 end
 
 function Base.hash(q::ExtendedRational, h::UInt)
-    # Hash is consistent within this type; no cross-type isequal is defined,
-    # so agreement with hash(::Rational) is not required.
     if isnan(q)
         return hash((:ExtendedRational, :NaN), h)
     elseif isinf(q)
@@ -206,37 +202,37 @@ Base.:>=(a::ExtendedRational, b::ExtendedRational) = !isless(a, b)
 # helpers for finite arithmetic
 # -----------------------------------------------------------------------------
 
-function _add_finite(a::ExtendedRational, b::ExtendedRational)
+function _add_finite(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
     g = gcd(a.den, b.den)
     ad = div(a.den, g)
     bd = div(b.den, g)
     n = a.num * bd + b.num * ad
-    iszero(n) && return zero(ExtendedRational)
+    iszero(n) && return zero(ExtendedRational{I})
     gn = gcd(abs(n), g)
-    return ExtendedRational(div(n, gn), ad * div(b.den, gn))
+    return ExtendedRational{I}(div(n, gn), ad * div(b.den, gn))
 end
 
-function _mul_finite(a::ExtendedRational, b::ExtendedRational)
+function _mul_finite(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
     g1 = gcd(abs(a.num), b.den)
     g2 = gcd(abs(b.num), a.den)
     n1 = div(a.num, g1)
     d1 = div(a.den, g2)
     n2 = div(b.num, g2)
     d2 = div(b.den, g1)
-    return ExtendedRational(n1 * n2, d1 * d2)
+    return ExtendedRational{I}(n1 * n2, d1 * d2)
 end
 
 # -----------------------------------------------------------------------------
 # unary ops and arithmetic
 # -----------------------------------------------------------------------------
 
-Base.abs(q::ExtendedRational) = isnan(q) ? NaN(q) : ExtendedRational(abs(q.num), q.den)
+Base.abs(q::ExtendedRational{I}) where {I<:Integer} = isnan(q) ? NaN(q) : ExtendedRational{I}(abs(q.num), q.den)
 Base.:+(q::ExtendedRational) = q
-Base.:-(q::ExtendedRational) = ExtendedRational(-q.num, q.den)
+Base.:-(q::ExtendedRational{I}) where {I<:Integer} = ExtendedRational{I}(-q.num, q.den)
 
-function Base.:+(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b) && return NaN(ExtendedRational)
-    isinf(a) && isinf(b) && return signbit(a) == signbit(b) ? a : NaN(ExtendedRational)
+function Base.:+(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+    isnan(a) || isnan(b) && return NaN(ExtendedRational{I})
+    isinf(a) && isinf(b) && return signbit(a) == signbit(b) ? a : NaN(ExtendedRational{I})
     isinf(a) && return a
     isinf(b) && return b
     return _add_finite(a, b)
@@ -244,77 +240,70 @@ end
 
 Base.:-(a::ExtendedRational, b::ExtendedRational) = a + (-b)
 
-function Base.:*(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b) && return NaN(ExtendedRational)
-    (isinf(a) && iszero(b)) || (isinf(b) && iszero(a)) && return NaN(ExtendedRational)
+function Base.:*(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+    isnan(a) || isnan(b) && return NaN(ExtendedRational{I})
+    (isinf(a) && iszero(b)) || (isinf(b) && iszero(a)) && return NaN(ExtendedRational{I})
     (isinf(a) || isinf(b)) && return signbit(a) != signbit(b) ?
-                                     NegInf(ExtendedRational) : Inf(ExtendedRational)
+                                     NegInf(ExtendedRational{I}) : Inf(ExtendedRational{I})
     return _mul_finite(a, b)
 end
 
-function Base.inv(q::ExtendedRational)
-    isnan(q) && return NaN(ExtendedRational)
-    # Canonical zero has num == 0 and den == 1, so signbit(q) == false.
-    # There is no negative-zero representation; inv(0) is always +Inf.
-    iszero(q) && return Inf(ExtendedRational)
-    isinf(q) && return zero(ExtendedRational)
-    return ExtendedRational(q.den, q.num)
+function Base.inv(q::ExtendedRational{I}) where {I<:Integer}
+    isnan(q) && return NaN(ExtendedRational{I})
+    iszero(q) && return Inf(ExtendedRational{I})
+    isinf(q) && return zero(ExtendedRational{I})
+    return ExtendedRational{I}(q.den, q.num)
 end
 
 Base.:/(a::ExtendedRational, b::ExtendedRational) = a * inv(b)
-# Base.:(÷)(a::ExtendedRational, b::ExtendedRational) = div(a, b)
 
-function Base.:^(q::ExtendedRational, n::Integer)
-    n == 0 && return one(ExtendedRational)       # q^0 = 1 for all q (IEEE convention)
+function Base.:^(q::ExtendedRational{I}, n::Integer) where {I<:Integer}
+    n == 0 && return one(ExtendedRational{I})       # q^0 = 1 for all q (IEEE convention)
     n < 0 && return inv(q)^(-n)
-    isnan(q) && return NaN(ExtendedRational)
+    isnan(q) && return NaN(ExtendedRational{I})
     if isinf(q)
-        # n > 0 is guaranteed here (n == 0 and n < 0 handled above).
-        iseven(n) && return Inf(ExtendedRational)
-        return signbit(q) ? NegInf(ExtendedRational) : Inf(ExtendedRational)
+        iseven(n) && return Inf(ExtendedRational{I})
+        return signbit(q) ? NegInf(ExtendedRational{I}) : Inf(ExtendedRational{I})
     end
-    return ExtendedRational(q.num^n, q.den^n)
+    return ExtendedRational{I}(q.num^n, q.den^n)
 end
 
 # -----------------------------------------------------------------------------
 # quotient / remainder family
 # -----------------------------------------------------------------------------
 
-function Base.div(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational)
-    isinf(b) && return zero(ExtendedRational)
-    return ExtendedRational(div(a.num * b.den, a.den * b.num), 1)
+function Base.div(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
+    isinf(b) && return zero(ExtendedRational{I})
+    return ExtendedRational{I}(div(a.num * b.den, a.den * b.num), one(I))
 end
 
-function Base.fld(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational)
-    # For finite a: a / ±Inf = 0 exactly (exact rational arithmetic, not a limit),
-    # so floor(0) = 0 regardless of the signs of a and b.
-    isinf(b) && return zero(ExtendedRational)
-    return ExtendedRational(fld(a.num * b.den, a.den * b.num), 1)
+function Base.fld(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
+    isinf(b) && return zero(ExtendedRational{I})
+    return ExtendedRational{I}(fld(a.num * b.den, a.den * b.num), one(I))
 end
 
-function Base.cld(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational)
-    # For finite a: a / ±Inf = 0 exactly, so ceil(0) = 0.
-    isinf(b) && return zero(ExtendedRational)
-    return ExtendedRational(cld(a.num * b.den, a.den * b.num), 1)
+function Base.cld(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
+    isinf(b) && return zero(ExtendedRational{I})
+    return ExtendedRational{I}(cld(a.num * b.den, a.den * b.num), one(I))
 end
 
-function Base.rem(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational)
+function Base.rem(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
     isinf(b) && return a
     return a - div(a, b) * b
 end
 
-function Base.mod(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational)
+function Base.mod(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
     isinf(b) && return a
     return a - fld(a, b) * b
 end
 
-Base.fld1(a::ExtendedRational, b::ExtendedRational) = fld(a - one(ExtendedRational), b) + one(ExtendedRational)
-Base.mod1(a::ExtendedRational, b::ExtendedRational) = mod(a - one(ExtendedRational), b) + one(ExtendedRational)
+Base.fld1(a::ExtendedRational, b::ExtendedRational) = fld(a - one(a), b) + one(a)
+Base.mod1(a::ExtendedRational, b::ExtendedRational) = mod(a - one(a), b) + one(a)
 
 Base.divrem(a::ExtendedRational, b::ExtendedRational) = (div(a, b), rem(a, b))
 Base.fldmod(a::ExtendedRational, b::ExtendedRational) = (fld(a, b), mod(a, b))
@@ -335,12 +324,12 @@ For non-finite values a closure policy is used:
 - `gcd(±Inf, ±Inf) = +Inf`
 - `gcd(±Inf, x_finite) = abs(x_finite)`
 """
-function Base.gcd(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b) && return NaN(ExtendedRational)
-    isinf(a) && isinf(b) && return Inf(ExtendedRational)
+function Base.gcd(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+    isnan(a) || isnan(b) && return NaN(ExtendedRational{I})
+    isinf(a) && isinf(b) && return Inf(ExtendedRational{I})
     isinf(a) && return abs(b)
     isinf(b) && return abs(a)
-    return ExtendedRational(gcd(a.num, b.num), lcm(a.den, b.den))
+    return ExtendedRational{I}(gcd(a.num, b.num), lcm(a.den, b.den))
 end
 
 """
@@ -354,18 +343,17 @@ For non-finite values a closure policy is used:
 - `lcm(0, x) = 0` for finite `x`
 - `lcm(±Inf, x)` is `+Inf` when `x ≠ 0`
 """
-function Base.lcm(a::ExtendedRational, b::ExtendedRational)
-    isnan(a) || isnan(b) && return NaN(ExtendedRational)
-    iszero(a) || iszero(b) && return zero(ExtendedRational)
-    isinf(a) || isinf(b) && return Inf(ExtendedRational)
-    return ExtendedRational(lcm(a.num, b.num), gcd(a.den, b.den))
+function Base.lcm(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+    isnan(a) || isnan(b) && return NaN(ExtendedRational{I})
+    iszero(a) || iszero(b) && return zero(ExtendedRational{I})
+    isinf(a) || isinf(b) && return Inf(ExtendedRational{I})
+    return ExtendedRational{I}(lcm(a.num, b.num), gcd(a.den, b.den))
 end
 
 # -----------------------------------------------------------------------------
 # display
 # -----------------------------------------------------------------------------
 
-# Delegate string() to show to avoid duplicating logic.
 Base.string(q::ExtendedRational) = sprint(show, q)
 
 function Base.show(io::IO, ::MIME"text/plain", q::ExtendedRational)

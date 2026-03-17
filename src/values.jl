@@ -43,12 +43,12 @@ function HexStringValueOf(@nospecialize(fmt::Format), cp::Integer)
     0 <= cp <= cp_max(fmt) || throw(ArgumentError("code point $cp out of range [0, $(cp_max(fmt))]"))
 
     cp == cp_nan(fmt) && return "NaN"
-    cp == cp_zero(fmt) && return Qx64(0, 1)
+    cp == cp_zero(fmt) && return hex_sprintf(Qx64(0, 1))
 
     cp = cp_inf(fmt)
-    cp !== nothing && return Qx64(1, 0)
+    cp !== nothing && return hex_sprintf(Qx64(1, 0))
     cp = cp_neginf(fmt)
-    cp !== nothing && Qx64(-1, 0)
+    cp !== nothing && return hex_sprintf(Qx64(-1, 0))
 
     red = sign_reduce(fmt, cp)
     val = _decode_positive_half(fmt, red.cp_abs)

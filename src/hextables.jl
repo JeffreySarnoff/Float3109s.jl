@@ -38,6 +38,11 @@ for K in MinK:MaxK
     end
 end
 
+function AllHexStringValuesOf(fmt::Format{signedness,domain}) where {signedness,domain}
+    values = AllValuesOf(fmt)
+    map(hex_sprintf, values)
+end
+
 function writetable(path, table)
     CSV.write(path, table)
 end

@@ -9,8 +9,9 @@ end
 
 
 for k in 3:16
-    finalcodepoint = 0x0002^k - 0x0001
-    codepoints = collect(k <= 8 ? collect(0x00:UInt8(finalcodepoint)) : collect(0x0000:UInt16(finalcodepoint)))
+    codetype = k <= 8 ? UInt8 : UInt16
+    finalcodepoint = (2^k - 1)
+    codepoints = collect(codetype(0):codetype(finalcodepoint))
     cp_unsigned_nan = finalcodepoint
     cp_signed_nan = finalcodepoint >> 0x01
     K = k

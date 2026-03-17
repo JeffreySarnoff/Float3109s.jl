@@ -68,6 +68,6 @@ include("counts.jl")
 include("codepoints.jl")
 include("floatvalues.jl")
 include("values.jl")
-include("writehex.jl")
+include("hextables.jl")
 
 end # module

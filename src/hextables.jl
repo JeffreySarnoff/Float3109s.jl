@@ -34,12 +34,8 @@ for K in MinK:MaxK
             values = AllValuesOf(fmt)
             hexstring_values = map(hex_sprintf, values)
             localtable = columntable((; codepoint=codepoints, hexstring=hexstring_values))
-            writetable(fourpaths[Symbol(fmtkind)], localtable)
+            # writetable(fourpaths[Symbol(fmtkind)], localtable)
+            CSV.write(fourpaths[Symbol(fmtkind)], localtable)
         end
     end
-end
-
-
-function writetable(path, table)
-    CSV.write(path, table)
 end

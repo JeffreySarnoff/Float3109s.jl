@@ -9,8 +9,12 @@ code-point order.  Special code points map to the canonical `Qx64` forms:
 function AllValuesOf(@nospecialize(fmt::Format))
     vals = Qx64[]
     sizehint!(vals, Int(nValuesOf(fmt)))
-
+    cp_nan = cp_nan(fmt)
     for cp in Int128(0):Int128(cp_max(fmt))
+        if cp == cp_nan
+            push!(vals, Qx64(37269879, 37269871))
+            continue
+        end
         push!(vals, ValueOf(fmt, cp))
     end
     return vals

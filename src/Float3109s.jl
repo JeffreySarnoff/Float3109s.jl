@@ -46,7 +46,7 @@ export
     val_pos_normal_min, val_pos_normal_max,
     val_neg_normal_min, val_neg_normal_max,
     FiniteValueOf, FiniteValueOfOrdinalPos, FiniteValueOfOrdinalNeg,
-    AllFiniteValuesOf, AllPositiveFiniteValuesOf
+    AllValuesOf, AllFiniteValuesOf, AllPositiveFiniteValuesOf, AllNegativeFiniteValuesOf
 
 setprecision(BigFloat, 1024)
 

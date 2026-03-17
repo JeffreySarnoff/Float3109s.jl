@@ -21,6 +21,9 @@ for K in MinK:MaxK
         fourpaths = (;
             uf=joinpath(subsubpath, fournames.uf), ue=joinpath(subsubpath, fournames.ue),
             sf=joinpath(subsubpath, fournames.sf), se=joinpath(subsubpath, fournames.se))
+
+        tables = []
+
         for fmtkind in keys(fourpaths)
             signedness, domain = FmtKinds[Symbol(fmtkind)]
             if P < K
@@ -29,6 +32,11 @@ for K in MinK:MaxK
                 fmt = Format{UnsignedFormat,domain}(K, P)
             end
             values = AllHexStringValuesOf(fmt)
+            localtable = columntable((; codepoint=codepoints, hexstring=values))
+            push!(tables, localtable)
+        end
+        for tbl in tables
+            writetable(fourpaths[Symbol(fmtkind)], tbl)
         end
     end
 end

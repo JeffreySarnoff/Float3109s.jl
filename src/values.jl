@@ -1,5 +1,20 @@
 # values.jl — decode the ith code point of any Format to its exact value
 
+"""
+    AllValuesOf(fmt) -> Vector{Qx64}
+
+Return the exact rational values for every code point in `fmt`, in
+code-point order.  Special code points map to the canonical `Qx64` forms:
+"""
+function AllValuesOf(@nospecialize(fmt::Format))
+    vals = Qx64[]
+    sizehint!(vals, Int(nValuesOf(fmt)))
+
+    for cp in Int128(0):Int128(cp_max(fmt))
+        push!(vals, ValueOf(fmt, cp))
+    end
+    return vals
+end
 
 """
     ValueOf(fmt, cp) -> Qx64
@@ -151,7 +166,6 @@ function AllNonnegativeFiniteValuesOf(@nospecialize(fmt::Format))
     end
     return vals
 end
-
 
 """
     AllNegativeFiniteValuesOf(fmt) -> Vector{Qx64}

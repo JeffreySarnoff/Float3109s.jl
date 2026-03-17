@@ -59,6 +59,11 @@ hex_sprintf(x) = @sprintf("%a", BigFloat(x))
 
 const P3109Base = s"C:/git/P3109/"
 
+const Ext = ".csv"
+
+const MinK = 3
+const MaxK = 16
+
 include("support.jl")
 include("typing/traits.jl")
 include("typing/types.jl")
@@ -68,6 +73,7 @@ include("counts.jl")
 include("codepoints.jl")
 include("floatvalues.jl")
 include("values.jl")
+include("createfiles.jl")
 include("hextables.jl")
 
 end # module

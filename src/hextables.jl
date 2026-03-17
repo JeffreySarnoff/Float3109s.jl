@@ -33,10 +33,11 @@ for K in MinK:MaxK
             end
             values = AllHexStringValuesOf(fmt)
             localtable = columntable((; codepoint=codepoints, hexstring=values))
-            push!(tables, localtable)
-        end
-        for tbl in tables
-            writetable(fourpaths[Symbol(fmtkind)], tbl)
+            writetable(fourpaths[Symbol(fmtkind)], localtable)
         end
     end
+end
+
+function writetable(path, table)
+    CSV.write(path, table)
 end

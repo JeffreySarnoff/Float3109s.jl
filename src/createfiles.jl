@@ -1,5 +1,5 @@
 # P3109Base = s"C:/git/P3109/"
-const HexStringsBase = joinpath(P3109Base, "HexStrings")
+# const HexStringsBase = joinpath(P3109Base, "HexStrings")
 
 for K in MinK:MaxK
     subdir = string("K", K)

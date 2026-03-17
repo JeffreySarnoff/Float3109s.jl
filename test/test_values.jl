@@ -8,11 +8,11 @@ using Float3109s
 function all_formats(K, P)
     fmts = []
     for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-                    (is_signed, is_finite),   (is_signed, is_extended))
+        (is_signed, is_finite), (is_signed, is_extended))
         Σ = S === is_signed ? 1 : 0
         W = K - P + 1 - Σ
         W >= 1 || continue
-        push!(fmts, Format{S, D}(K, P))
+        push!(fmts, Format{S,D}(K, P))
     end
     fmts
 end
@@ -22,7 +22,7 @@ end
 # =========================================================================
 
 @testset "ValueOf(cp=0) == 0 for all formats" begin
-    for K in 2:10, P in 1:(K - 1)
+    for K in 2:10, P in 1:(K-1)
         for fmt in all_formats(K, P)
             @test ValueOf(fmt, 0) == Rational{BigInt}(0)
         end
@@ -34,7 +34,7 @@ end
 # =========================================================================
 
 @testset "ValueOf throws on NaN code point" begin
-    for K in 2:8, P in 1:(K - 1)
+    for K in 2:8, P in 1:(K-1)
         for fmt in all_formats(K, P)
             @test_throws ArgumentError ValueOf(fmt, cp_nan(fmt))
         end
@@ -44,25 +44,25 @@ end
 @testset "ValueOf throws on +Inf code point" begin
     for K in 2:8, P in 1:K
         K - P + 1 >= 1 || continue
-        ue = Format{is_unsigned, is_extended}(K, P)
+        ue = Format{UnsignedFormat,ExtendedFormat}(K, P)
         @test_throws ArgumentError ValueOf(ue, cp_inf(ue))
     end
 
-    for K in 3:8, P in 1:(K - 1)
-        se = Format{is_signed, is_extended}(K, P)
+    for K in 3:8, P in 1:(K-1)
+        se = Format{SignedFormat,ExtendedFormat}(K, P)
         @test_throws ArgumentError ValueOf(se, cp_inf(se))
     end
 end
 
 @testset "ValueOf throws on -Inf code point" begin
-    for K in 3:8, P in 1:(K - 1)
-        se = Format{is_signed, is_extended}(K, P)
+    for K in 3:8, P in 1:(K-1)
+        se = Format{SignedFormat,ExtendedFormat}(K, P)
         @test_throws ArgumentError ValueOf(se, cp_neginf(se))
     end
 end
 
 @testset "ValueOf throws on out-of-range code points" begin
-    for K in 2:6, P in 1:(K - 1)
+    for K in 2:6, P in 1:(K-1)
         for fmt in all_formats(K, P)
             @test_throws ArgumentError ValueOf(fmt, -1)
             @test_throws ArgumentError ValueOf(fmt, Int(cp_max(fmt)) + 1)
@@ -76,7 +76,7 @@ end
 # =========================================================================
 
 @testset "ValueOf(cp=1) is the smallest positive value" begin
-    for K in 2:8, P in 1:(K - 1)
+    for K in 2:8, P in 1:(K-1)
         for fmt in all_formats(K, P)
             v = ValueOf(fmt, 1)
             @test v > 0
@@ -94,7 +94,7 @@ end
 # =========================================================================
 
 @testset "Subnormal values are evenly spaced" begin
-    for K in 3:8, P in 2:(K - 1)
+    for K in 3:8, P in 2:(K-1)
         for fmt in all_formats(K, P)
             nsub = nPosSubnormalsOf(fmt)
             nsub >= 2 || continue
@@ -113,7 +113,7 @@ end
 # =========================================================================
 
 @testset "Normal values within a binade are evenly spaced" begin
-    for K in 3:8, P in 2:(K - 1)
+    for K in 3:8, P in 2:(K-1)
         for fmt in all_formats(K, P)
             m = Int(significand_scale(fmt))  # values per binade
             cp_nmin = Int(cp_pos_normal_min(fmt))
@@ -122,9 +122,9 @@ end
             # check first binade
             if cp_nmin + m - 1 <= cp_nmax
                 v_start = ValueOf(fmt, cp_nmin)
-                v_next  = ValueOf(fmt, cp_nmin + 1)
+                v_next = ValueOf(fmt, cp_nmin + 1)
                 ulp = v_next - v_start
-                for j in 0:(m - 1)
+                for j in 0:(m-1)
                     cp = cp_nmin + j
                     cp <= cp_nmax || break
                     @test ValueOf(fmt, cp) == v_start + j * ulp
@@ -135,7 +135,7 @@ end
 end
 
 @testset "ULP doubles between consecutive binades" begin
-    for K in 4:8, P in 2:(K - 2)
+    for K in 4:8, P in 2:(K-2)
         for fmt in all_formats(K, P)
             m = Int(significand_scale(fmt))
             cp_nmin = Int(cp_pos_normal_min(fmt))
@@ -159,11 +159,11 @@ end
 # =========================================================================
 
 @testset "Positive-half values strictly increase K ≤ 8" begin
-    for K in 2:8, P in 1:(K - 1)
+    for K in 2:8, P in 1:(K-1)
         for fmt in all_formats(K, P)
             vals = AllPositiveFiniteValuesOf(fmt)
             for i in 2:length(vals)
-                @test vals[i] > vals[i - 1]
+                @test vals[i] > vals[i-1]
             end
         end
     end
@@ -174,9 +174,9 @@ end
 # =========================================================================
 
 @testset "Negative values mirror positive values" begin
-    for K in 3:7, P in 1:(K - 1)
+    for K in 3:7, P in 1:(K-1)
         for D in (is_finite, is_extended)
-            fmt = Format{is_signed, D}(K, P)
+            fmt = Format{SignedFormat,D}(K, P)
             npos = nPosFiniteValuesOf(fmt)
             nneg = nNegFiniteValuesOf(fmt)
             @test npos == nneg
@@ -195,7 +195,7 @@ end
 # =========================================================================
 
 @testset "ValueOfOrdinalPos(1) is smallest positive value" begin
-    for K in 2:8, P in 1:(K - 1)
+    for K in 2:8, P in 1:(K-1)
         for fmt in all_formats(K, P)
             v = ValueOfOrdinalPos(fmt, 1)
             @test v == ValueOf(fmt, 1)
@@ -205,7 +205,7 @@ end
 end
 
 @testset "ValueOfOrdinalPos(n) is largest positive finite value" begin
-    for K in 2:8, P in 1:(K - 1)
+    for K in 2:8, P in 1:(K-1)
         for fmt in all_formats(K, P)
             n = nPosFiniteValuesOf(fmt)
             v = ValueOfOrdinalPos(fmt, n)
@@ -215,7 +215,7 @@ end
 end
 
 @testset "ValueOfOrdinalPos out-of-range throws" begin
-    for K in 3:6, P in 2:(K - 1)
+    for K in 3:6, P in 2:(K-1)
         for fmt in all_formats(K, P)
             n = nPosFiniteValuesOf(fmt)
             @test_throws ArgumentError ValueOfOrdinalPos(fmt, 0)
@@ -232,16 +232,16 @@ end
     for K in 2:6, P in 1:K
         K - P + 1 >= 1 || continue
         for D in (is_finite, is_extended)
-            fmt = Format{is_unsigned, D}(K, P)
+            fmt = Format{UnsignedFormat,D}(K, P)
             @test_throws ArgumentError ValueOfOrdinalNeg(fmt, 1)
         end
     end
 end
 
 @testset "ValueOfOrdinalNeg out-of-range throws for signed" begin
-    for K in 3:6, P in 1:(K - 1)
+    for K in 3:6, P in 1:(K-1)
         for D in (is_finite, is_extended)
-            fmt = Format{is_signed, D}(K, P)
+            fmt = Format{SignedFormat,D}(K, P)
             n = nNegFiniteValuesOf(fmt)
             @test_throws ArgumentError ValueOfOrdinalNeg(fmt, 0)
             @test_throws ArgumentError ValueOfOrdinalNeg(fmt, n + 1)
@@ -250,9 +250,9 @@ end
 end
 
 @testset "ValueOfOrdinalNeg increasing magnitude" begin
-    for K in 3:7, P in 1:(K - 1)
+    for K in 3:7, P in 1:(K-1)
         for D in (is_finite, is_extended)
-            fmt = Format{is_signed, D}(K, P)
+            fmt = Format{SignedFormat,D}(K, P)
             n = nNegFiniteValuesOf(fmt)
             n >= 2 || continue
             for i in 2:n
@@ -268,7 +268,7 @@ end
 # =========================================================================
 
 @testset "AllFiniteValuesOf length == nFiniteValuesOf" begin
-    for K in 2:7, P in 1:(K - 1)
+    for K in 2:7, P in 1:(K-1)
         for fmt in all_formats(K, P)
             @test length(AllFiniteValuesOf(fmt)) == nFiniteValuesOf(fmt)
         end
@@ -276,7 +276,7 @@ end
 end
 
 @testset "AllPositiveFiniteValuesOf length == nPosFiniteValuesOf" begin
-    for K in 2:7, P in 1:(K - 1)
+    for K in 2:7, P in 1:(K-1)
         for fmt in all_formats(K, P)
             @test length(AllPositiveFiniteValuesOf(fmt)) == nPosFiniteValuesOf(fmt)
         end
@@ -288,7 +288,7 @@ end
 # =========================================================================
 
 @testset "All values are dyadic rationals (denominator is power of 2)" begin
-    for K in 2:7, P in 1:(K - 1)
+    for K in 2:7, P in 1:(K-1)
         for fmt in all_formats(K, P)
             for v in AllFiniteValuesOf(fmt)
                 d = denominator(v)
@@ -305,7 +305,7 @@ end
 # =========================================================================
 
 @testset "AllPositiveFiniteValuesOf contains only positive values" begin
-    for K in 2:7, P in 1:(K - 1)
+    for K in 2:7, P in 1:(K-1)
         for fmt in all_formats(K, P)
             for v in AllPositiveFiniteValuesOf(fmt)
                 @test v > 0
@@ -319,13 +319,13 @@ end
 # =========================================================================
 
 @testset "Full ladder: unsigned finite K=3 P=2" begin
-    fmt = Format{is_unsigned, is_finite}(3, 2)
+    fmt = Format{UnsignedFormat,FiniteFormat}(3, 2)
     @test AllFiniteValuesOf(fmt) == Rational{BigInt}[0, 1//4, 1//2, 3//4, 1, 3//2, 2]
     @test AllPositiveFiniteValuesOf(fmt) == Rational{BigInt}[1//4, 1//2, 3//4, 1, 3//2, 2]
 end
 
 @testset "Full ladder: unsigned extended K=3 P=2" begin
-    fmt = Format{is_unsigned, is_extended}(3, 2)
+    fmt = Format{UnsignedFormat,ExtendedFormat}(3, 2)
     # cp 6 = +Inf, so finite values are cp 0..5
     @test AllFiniteValuesOf(fmt) == Rational{BigInt}[0, 1//4, 1//2, 3//4, 1, 3//2]
     @test AllPositiveFiniteValuesOf(fmt) == Rational{BigInt}[1//4, 1//2, 3//4, 1, 3//2]
@@ -339,14 +339,14 @@ end
     # K=4, P=2, W=2, B=2
     # Positive: cp 1=sub, cp 2..6=normals
     # Negative: cp 9=sub, cp 10..14=normals
-    fmt = Format{is_signed, is_extended}(4, 2)
+    fmt = Format{SignedFormat,ExtendedFormat}(4, 2)
 
     pos_vals = AllPositiveFiniteValuesOf(fmt)
     @test length(pos_vals) == nPosFiniteValuesOf(fmt)
 
     # all positive values are strictly increasing
     for i in 2:length(pos_vals)
-        @test pos_vals[i] > pos_vals[i - 1]
+        @test pos_vals[i] > pos_vals[i-1]
     end
 
     # first positive = val_pos_subnormal_min
@@ -366,7 +366,7 @@ end
 # =========================================================================
 
 @testset "Decode roundtrip: every finite cp decodes to a unique value K ≤ 7" begin
-    for K in 2:7, P in 1:(K - 1)
+    for K in 2:7, P in 1:(K-1)
         for fmt in all_formats(K, P)
             vals = AllFiniteValuesOf(fmt)
             # no duplicates (except zero appears once)
@@ -381,9 +381,9 @@ end
 # =========================================================================
 
 @testset "Signed AllFiniteValuesOf: negative < 0 < positive" begin
-    for K in 3:7, P in 2:(K - 1)
+    for K in 3:7, P in 2:(K-1)
         for D in (is_finite, is_extended)
-            fmt = Format{is_signed, D}(K, P)
+            fmt = Format{SignedFormat,D}(K, P)
             vals = AllFiniteValuesOf(fmt)
 
             # zero should be present exactly once
@@ -406,7 +406,7 @@ end
 # =========================================================================
 
 @testset "First normal in each binade is a power of 2" begin
-    for K in 3:8, P in 2:(K - 1)
+    for K in 3:8, P in 2:(K-1)
         for fmt in all_formats(K, P)
             m = Int(significand_scale(fmt))
             cp_nmin = Int(cp_pos_normal_min(fmt))
@@ -438,7 +438,7 @@ end
 @testset "K=16 P=8: basic structural sanity" begin
     for (S, D) in ((is_unsigned, is_finite), (is_signed, is_extended))
         Σ = S === is_signed ? 1 : 0
-        fmt = Format{S, D}(16, 8)
+        fmt = Format{S,D}(16, 8)
 
         # ValueOf at boundaries
         @test ValueOf(fmt, 0) == 0
@@ -492,14 +492,14 @@ end
 # =========================================================================
 
 @testset "Minimal: unsigned finite K=2 P=1" begin
-    fmt = Format{is_unsigned, is_finite}(2, 1)
+    fmt = Format{UnsignedFormat,FiniteFormat}(2, 1)
     # 4 cps: 0=zero, 1,2=normals, 3=NaN
     # B=2, normals: cp1 → 2^(1-2)=1/2, cp2 → 2^(2-2)=1
     @test AllFiniteValuesOf(fmt) == Rational{BigInt}[0, 1//2, 1]
 end
 
 @testset "Minimal: unsigned finite K=2 P=2" begin
-    fmt = Format{is_unsigned, is_finite}(2, 2)
+    fmt = Format{UnsignedFormat,FiniteFormat}(2, 2)
     # 4 cps: 0=zero, 1=subnormal, 2=normal, 3=NaN
     # B=1, sub: 1*2^(2-2-1)=1/2, normal: cp2 e=1,k=0: 2^0=1
     @test AllFiniteValuesOf(fmt) == Rational{BigInt}[0, 1//2, 1]

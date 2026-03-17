@@ -2,11 +2,11 @@
 
 
 """
-    ValueOf(fmt, cp) -> ExtendedRational{BigInt}
+    ValueOf(fmt, cp) -> Qx64{BigInt}
 
-Return the exact `ExtendedRational{BigInt}` value of code point `cp` in format `fmt`.
+Return the exact `Qx64{BigInt}` value of code point `cp` in format `fmt`.
 
-Special code points map to the canonical `ExtendedRational{BigInt}` forms:
+Special code points map to the canonical `Qx64{BigInt}` forms:
 
 - zero  → `0//1`
 - +Inf  → `1//0`
@@ -18,13 +18,13 @@ For finite numerical code points the result is an exact dyadic rational.
 function ValueOf(@nospecialize(fmt::Format), cp::Integer)
     0 <= cp <= cp_max(fmt) || throw(ArgumentError("code point $cp out of range [0, $(cp_max(fmt))]"))
 
-    cp == cp_zero(fmt) && return ExtendedRational{BigInt}(0)
-    cp == cp_nan(fmt) && return NaN(ExtendedRational{BigInt})
+    cp == cp_zero(fmt) && return Qx64{BigInt}(0)
+    cp == cp_nan(fmt) && return NaN(Qx64{BigInt})
 
     inf_cp = cp_inf(fmt)
-    inf_cp !== nothing && cp == inf_cp && return Inf(ExtendedRational{BigInt})
+    inf_cp !== nothing && cp == inf_cp && return Inf(Qx64{BigInt})
     ninf_cp = cp_neginf(fmt)
-    ninf_cp !== nothing && cp == ninf_cp && return NegInf(ExtendedRational{BigInt})
+    ninf_cp !== nothing && cp == ninf_cp && return NegInf(Qx64{BigInt})
 
     red = sign_reduce(fmt, cp)
     val = _decode_positive_half(fmt, red.cp_abs)
@@ -32,7 +32,7 @@ function ValueOf(@nospecialize(fmt::Format), cp::Integer)
 end
 
 """
-    FiniteValueOf(fmt, cp) -> ExtendedRational{BigInt}
+    FiniteValueOf(fmt, cp) -> Qx64{BigInt}
 
 Return the exact rational value of a finite code point `cp` in format `fmt`.
 
@@ -40,7 +40,7 @@ The code point must be finite (not NaN, not ±Inf).  Zero is accepted.
 """
 function FiniteValueOf(@nospecialize(fmt::Format), cp::Integer)
     0 <= cp <= cp_max(fmt) || throw(ArgumentError("code point $cp out of range [0, $(cp_max(fmt))]"))
-    cp == cp_zero(fmt) && return ExtendedRational{BigInt}(0)
+    cp == cp_zero(fmt) && return Qx64{BigInt}(0)
 
     red = sign_reduce(fmt, cp)
     val = _decode_positive_half(fmt, red.cp_abs)
@@ -48,7 +48,7 @@ function FiniteValueOf(@nospecialize(fmt::Format), cp::Integer)
 end
 
 """
-    _decode_positive_half(fmt, cp_abs) -> ExtendedRational{BigInt}
+    _decode_positive_half(fmt, cp_abs) -> Qx64{BigInt}
 
 Decode a positive-half code point `cp_abs` (after sign reduction) to its
 exact rational value.  Caller must ensure `cp_abs > 0`.
@@ -67,13 +67,13 @@ function _decode_positive_half(@nospecialize(fmt::Format), cp_abs::Integer)
 
     if ca < m
         # subnormal
-        return ExtendedRational{BigInt}(dyadic_twopow(2 - P - Int(B))) * ExtendedRational{BigInt}(ca)
+        return Qx64{BigInt}(dyadic_twopow(2 - P - Int(B))) * Qx64{BigInt}(ca)
     else
         # normal: binade decomposition
         e = fld(ca, m)
         t = mod(ca, m)
         k = Int(e - B)
-        return ExtendedRational{BigInt}(dyadic_twopow(k)) + ExtendedRational{BigInt}(t) * ExtendedRational{BigInt}(dyadic_twopow(k + 1 - P))
+        return Qx64{BigInt}(dyadic_twopow(k)) + Qx64{BigInt}(t) * Qx64{BigInt}(dyadic_twopow(k + 1 - P))
     end
 end
 
@@ -82,13 +82,13 @@ end
 # =========================================================================
 
 """
-    AllFiniteValuesOf(fmt) -> Vector{ExtendedRational{BigInt}}
+    AllFiniteValuesOf(fmt) -> Vector{Qx64{BigInt}}
 
 Return the exact rational values for every finite numerical code point
 in `fmt`, in code-point order.  Zero is included; NaN and ±Inf are excluded.
 """
 function AllFiniteValuesOf(@nospecialize(fmt::Format))
-    vals = ExtendedRational{BigInt}[]
+    vals = Qx64{BigInt}[]
     sizehint!(vals, Int(nFiniteValuesOf(fmt)) + 1)
 
     nan_cp = cp_nan(fmt)
@@ -105,13 +105,13 @@ function AllFiniteValuesOf(@nospecialize(fmt::Format))
 end
 
 """
-    AllPositiveFiniteValuesOf(fmt) -> Vector{ExtendedRational{BigInt}}
+    AllPositiveFiniteValuesOf(fmt) -> Vector{Qx64{BigInt}}
 
 Return the exact rational values for every positive finite code point
 in `fmt`, in code-point order.  Zero is excluded.
 """
 function AllPositiveFiniteValuesOf(@nospecialize(fmt::Format))
-    vals = ExtendedRational{BigInt}[]
+    vals = Qx64{BigInt}[]
     sizehint!(vals, Int(nPosFiniteValuesOf(fmt)))
 
     cpstart = BigInt(cp_zero(fmt)) + 1
@@ -133,7 +133,7 @@ end
 # =========================================================================
 
 """
-    FiniteValueOfOrdinalPos(fmt, i) -> ExtendedRational{BigInt}
+    FiniteValueOfOrdinalPos(fmt, i) -> Qx64{BigInt}
 
 Return the exact value of the `i`-th positive finite value (1-based),
 ordered by increasing magnitude.
@@ -149,7 +149,7 @@ function FiniteValueOfOrdinalPos(@nospecialize(fmt::Format), i::Integer)
 end
 
 """
-    FiniteValueOfOrdinalNeg(fmt, i) -> ExtendedRational{BigInt}
+    FiniteValueOfOrdinalNeg(fmt, i) -> Qx64{BigInt}
 
 Return the exact value of the `i`-th negative finite value (1-based),
 ordered by increasing magnitude (i.e. `i = 1` is the negative value
@@ -157,12 +157,12 @@ closest to zero).
 
 Only valid for signed formats.
 """
-function FiniteValueOfOrdinalNeg(@nospecialize(fmt::Format{is_signed,T}), i::Integer) where T
+function FiniteValueOfOrdinalNeg(@nospecialize(fmt::Format{SignedFormat,T}), i::Integer) where T
     n = nNegFiniteValuesOf(fmt)
     1 <= i <= n || throw(ArgumentError("ordinal $i out of range [1, $n]"))
     cp = BigInt(cp_nan(fmt)) + BigInt(i)
     return FiniteValueOf(fmt, cp)
 end
 
-FiniteValueOfOrdinalNeg(@nospecialize(fmt::Format{is_unsigned,T}), i::Integer) where T =
+FiniteValueOfOrdinalNeg(@nospecialize(fmt::Format{UnsignedFormat,T}), i::Integer) where T =
     throw(ArgumentError("unsigned formats have no negative values"))

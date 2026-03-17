@@ -155,7 +155,7 @@ point.
 ## Example
 
 ```julia
-fmt = Format{is_signed, is_extended}(4, 2)
+fmt = Format{SignedFormat, ExtendedFormat}(4, 2)
 
 cp_zero(fmt)              # 0x00
 cp_pos_subnormal_min(fmt) # 0x01

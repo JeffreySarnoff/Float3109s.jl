@@ -7,10 +7,10 @@ using Float3109s
 
 function all_formats(K, P)
     (
-        uf = Format{is_unsigned, is_finite}(K, P),
-        ue = Format{is_unsigned, is_extended}(K, P),
-        sf = Format{is_signed,   is_finite}(K, P),
-        se = Format{is_signed,   is_extended}(K, P),
+        uf=Format{UnsignedFormat,FiniteFormat}(K, P),
+        ue=Format{UnsignedFormat,ExtendedFormat}(K, P),
+        sf=Format{SignedFormat,FiniteFormat}(K, P),
+        se=Format{SignedFormat,ExtendedFormat}(K, P),
     )
 end
 
@@ -21,7 +21,7 @@ end
 @testset "Universal invariants across format variants" begin
     # Sweep over a range of (K, P) including edge cases
     for K in 3:12
-        for P in 1:(K - 1)   # need W ≥ 1 for signed: K - P + 1 - 1 ≥ 1 → P ≤ K - 1
+        for P in 1:(K-1)   # need W ≥ 1 for signed: K - P + 1 - 1 ≥ 1 → P ≤ K - 1
             K - P + 1 >= 1 || continue  # unsigned constraint
 
             fmts = all_formats(K, P)
@@ -96,8 +96,8 @@ end
     for K in 3:10, P in 1:K
         K - P + 1 >= 1 || continue
 
-        for fmt in (Format{is_unsigned, is_finite}(K, P),
-                    Format{is_unsigned, is_extended}(K, P))
+        for fmt in (Format{UnsignedFormat,FiniteFormat}(K, P),
+            Format{UnsignedFormat,ExtendedFormat}(K, P))
             @testset "K=$K P=$P $(typeof(fmt))" begin
                 @test nNegValuesOf(fmt) == 0
                 @test nNegFiniteValuesOf(fmt) == 0
@@ -115,11 +115,11 @@ end
 # =========================================================================
 
 @testset "Signed format invariants" begin
-    for K in 3:10, P in 1:(K - 1)
+    for K in 3:10, P in 1:(K-1)
         K - P >= 1 || continue
 
-        for fmt in (Format{is_signed, is_finite}(K, P),
-                    Format{is_signed, is_extended}(K, P))
+        for fmt in (Format{SignedFormat,FiniteFormat}(K, P),
+            Format{SignedFormat,ExtendedFormat}(K, P))
             @testset "K=$K P=$P $(typeof(fmt))" begin
                 # signed formats have symmetric positive/negative counts
                 @test nPosValuesOf(fmt) == nNegValuesOf(fmt)
@@ -136,9 +136,9 @@ end
 # =========================================================================
 
 @testset "Finite-domain formats have no infinities" begin
-    for K in 3:10, P in 1:(K - 1)
-        for fmt in (Format{is_unsigned, is_finite}(K, P),
-                    Format{is_signed, is_finite}(K, P))
+    for K in 3:10, P in 1:(K-1)
+        for fmt in (Format{UnsignedFormat,FiniteFormat}(K, P),
+            Format{SignedFormat,FiniteFormat}(K, P))
             @test nInfsOf(fmt) == 0
             @test nPosInfsOf(fmt) == 0
             @test nNegInfsOf(fmt) == 0
@@ -149,14 +149,14 @@ end
 @testset "Extended-domain infinity counts" begin
     for K in 3:10, P in 1:K
         K - P + 1 >= 1 || continue
-        ue = Format{is_unsigned, is_extended}(K, P)
+        ue = Format{UnsignedFormat,ExtendedFormat}(K, P)
         @test nInfsOf(ue) == 1
         @test nPosInfsOf(ue) == 1
         @test nNegInfsOf(ue) == 0
     end
 
-    for K in 3:10, P in 1:(K - 1)
-        se = Format{is_signed, is_extended}(K, P)
+    for K in 3:10, P in 1:(K-1)
+        se = Format{SignedFormat,ExtendedFormat}(K, P)
         @test nInfsOf(se) == 2
         @test nPosInfsOf(se) == 1   # only +Inf is positive
         @test nNegInfsOf(se) == 1   # only -Inf is negative
@@ -171,13 +171,13 @@ end
     for K in 2:10
         K >= 2 || continue
         for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-                        (is_signed, is_finite),  (is_signed, is_extended))
+            (is_signed, is_finite), (is_signed, is_extended))
             # check W constraint
             Σ = S === is_signed ? 1 : 0
             W = K - 1 + 1 - Σ
             W >= 1 || continue
 
-            fmt = Format{S, D}(K, 1)
+            fmt = Format{S,D}(K, 1)
             @test nPosSubnormalsOf(fmt) == 0
             @test nNegSubnormalsOf(fmt) == 0
             @test nSubnormalsOf(fmt) == 0
@@ -194,7 +194,7 @@ end
 @testset "Hand-computed: Format{unsigned, finite}(3, 2)" begin
     # K=3, P=2: 8 code points, W=2, bias=2
     # cp 0=zero, 1=subnormal, 2..6=normals, 7=NaN
-    fmt = Format{is_unsigned, is_finite}(3, 2)
+    fmt = Format{UnsignedFormat,FiniteFormat}(3, 2)
 
     @test nValuesOf(fmt) == 8
     @test nNaNsOf(fmt) == 1
@@ -224,7 +224,7 @@ end
 
 @testset "Hand-computed: Format{unsigned, extended}(3, 2)" begin
     # Same as above but cp 6=+Inf, so only 5 positive finite values
-    fmt = Format{is_unsigned, is_extended}(3, 2)
+    fmt = Format{UnsignedFormat,ExtendedFormat}(3, 2)
 
     @test nValuesOf(fmt) == 8
     @test nNumericalValuesOf(fmt) == 7
@@ -245,7 +245,7 @@ end
     # cp 0=zero, 1=pos subnormal, 2..7=pos normals (6 normals)
     # cp 8=NaN
     # cp 9=neg subnormal, 10..15=neg normals (6 normals)
-    fmt = Format{is_signed, is_finite}(4, 2)
+    fmt = Format{SignedFormat,FiniteFormat}(4, 2)
 
     @test nValuesOf(fmt) == 16
     @test nNaNsOf(fmt) == 1
@@ -273,7 +273,7 @@ end
     # cp 0=zero, 1=pos sub, 2..6=pos normals, 7=+Inf
     # cp 8=NaN
     # cp 9=neg sub, 10..14=neg normals, 15=-Inf
-    fmt = Format{is_signed, is_extended}(4, 2)
+    fmt = Format{SignedFormat,ExtendedFormat}(4, 2)
 
     @test nValuesOf(fmt) == 16
     @test nNaNsOf(fmt) == 1
@@ -305,7 +305,7 @@ end
 @testset "Minimal format: unsigned finite K=2 P=1" begin
     # K=2, P=1: W=2, bias=2, 4 code points
     # cp 0=zero, 1,2=normals, 3=NaN
-    fmt = Format{is_unsigned, is_finite}(2, 1)
+    fmt = Format{UnsignedFormat,FiniteFormat}(2, 1)
 
     @test nValuesOf(fmt) == 4
     @test nNumericalValuesOf(fmt) == 3
@@ -320,7 +320,7 @@ end
     # K=2, P=2: W=1, ExponentBias=1 (unsigned: 2^NonSig = 2^0 = 1)
     # 4 code points, 1 trailing bit
     # cp 0=zero, 1=subnormal, 2=normal, 3=NaN
-    fmt = Format{is_unsigned, is_finite}(2, 2)
+    fmt = Format{UnsignedFormat,FiniteFormat}(2, 2)
 
     @test nValuesOf(fmt) == 4
     @test nNumericalValuesOf(fmt) == 3
@@ -333,7 +333,7 @@ end
     # K=3, P=1, W=3-1+1-1=2, bias=2
     # 8 code points: pos half 0..3, neg half 5..7
     # cp 0=zero, 1,2,3=pos normals, 4=NaN, 5,6,7=neg normals
-    fmt = Format{is_signed, is_finite}(3, 1)
+    fmt = Format{SignedFormat,FiniteFormat}(3, 1)
 
     @test nValuesOf(fmt) == 8
     @test nNumericalValuesOf(fmt) == 7
@@ -350,11 +350,11 @@ end
 @testset "8-bit formats (like IEEE-like tiny floats)" begin
     # K=8, P=4: similar to E4M3 style
     for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-                    (is_signed, is_finite),   (is_signed, is_extended))
+        (is_signed, is_finite), (is_signed, is_extended))
         Σ = S === is_signed ? 1 : 0
         W = 8 - 4 + 1 - Σ
         W >= 1 || continue
-        fmt = Format{S, D}(8, 4)
+        fmt = Format{S,D}(8, 4)
 
         @test nValuesOf(fmt) == 256
         @test nNaNsOf(fmt) == 1
@@ -364,8 +364,8 @@ end
 
 @testset "16-bit format counts" begin
     # K=16, P=8: moderate-size format
-    fmt_uf = Format{is_unsigned, is_finite}(16, 8)
-    fmt_se = Format{is_signed, is_extended}(16, 8)
+    fmt_uf = Format{UnsignedFormat,FiniteFormat}(16, 8)
+    fmt_se = Format{SignedFormat,ExtendedFormat}(16, 8)
 
     @test nValuesOf(fmt_uf) == 65536
     @test nValuesOf(fmt_se) == 65536
@@ -385,12 +385,12 @@ end
     for K in 2:8
         for P in 1:K
             for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-                            (is_signed, is_finite),  (is_signed, is_extended))
+                (is_signed, is_finite), (is_signed, is_extended))
                 Σ = S === is_signed ? 1 : 0
                 W = K - P + 1 - Σ
                 W >= 1 || continue
 
-                fmt = Format{S, D}(K, P)
+                fmt = Format{S,D}(K, P)
 
                 @testset "Enum K=$K P=$P $(S) $(D)" begin
                     # count by walking all code points
@@ -449,13 +449,13 @@ end
 # =========================================================================
 
 @testset "nBinadesOf equals number of normal binades" begin
-    for K in 3:10, P in 1:(K - 1)
+    for K in 3:10, P in 1:(K-1)
         for (S, D) in ((is_unsigned, is_finite), (is_signed, is_extended))
             Σ = S === is_signed ? 1 : 0
             W = K - P + 1 - Σ
             W >= 1 || continue
 
-            fmt = Format{S, D}(K, P)
+            fmt = Format{S,D}(K, P)
             B = ExponentBiasOf(fmt)
 
             @test nBinadesOf(fmt) == 2 * B - 1
@@ -477,12 +477,12 @@ end
 
 @testset "High precision: P close to K" begin
     # K=8, P=7 unsigned → W = 8-7+1 = 2
-    fmt = Format{is_unsigned, is_finite}(8, 7)
+    fmt = Format{UnsignedFormat,FiniteFormat}(8, 7)
     @test nPosSubnormalsOf(fmt) == 63   # twopow(6) - 1
     @test nBinadesOf(fmt) == 3           # 2*2-1
 
     # K=8, P=8 unsigned → W = 8-8+1 = 1
-    fmt = Format{is_unsigned, is_finite}(8, 8)
+    fmt = Format{UnsignedFormat,FiniteFormat}(8, 8)
     @test nPosSubnormalsOf(fmt) == 127  # twopow(7) - 1
     @test nBinadesOf(fmt) == 1           # 2*1-1
     @test nPosNormalsOf(fmt) == 127      # 1 binade × 2^7 code points... wait
@@ -496,7 +496,7 @@ end
 
 @testset "Wide exponent: P=1 various K" begin
     for K in 2:10
-        fmt = Format{is_unsigned, is_finite}(K, 1)
+        fmt = Format{UnsignedFormat,FiniteFormat}(K, 1)
         @test nPosSubnormalsOf(fmt) == 0
         @test nSubnormalsOf(fmt) == 0
         @test nPrenormalsOf(fmt) == 1   # just zero
@@ -508,7 +508,7 @@ end
 
 @testset "Wide exponent: P=2 various K" begin
     for K in 2:10
-        fmt = Format{is_unsigned, is_finite}(K, 2)
+        fmt = Format{UnsignedFormat,FiniteFormat}(K, 2)
         @test nPosSubnormalsOf(fmt) == 1   # twopow(1) - 1
         @test nNonNegPrenormalsOf(fmt) == 2
     end
@@ -519,11 +519,11 @@ end
 # =========================================================================
 
 @testset "Finite has more finite values than extended" begin
-    for K in 3:10, P in 1:(K - 1)
-        uf = Format{is_unsigned, is_finite}(K, P)
-        ue = Format{is_unsigned, is_extended}(K, P)
-        sf = Format{is_signed, is_finite}(K, P)
-        se = Format{is_signed, is_extended}(K, P)
+    for K in 3:10, P in 1:(K-1)
+        uf = Format{UnsignedFormat,FiniteFormat}(K, P)
+        ue = Format{UnsignedFormat,ExtendedFormat}(K, P)
+        sf = Format{SignedFormat,FiniteFormat}(K, P)
+        se = Format{SignedFormat,ExtendedFormat}(K, P)
 
         @test nFiniteValuesOf(uf) > nFiniteValuesOf(ue)
         @test nFiniteValuesOf(sf) > nFiniteValuesOf(se)
@@ -539,10 +539,10 @@ end
 # =========================================================================
 
 @testset "Unsigned has more positive values than signed" begin
-    for K in 3:10, P in 1:(K - 1)
+    for K in 3:10, P in 1:(K-1)
         for D in (is_finite, is_extended)
-            uf = Format{is_unsigned, D}(K, P)
-            sf = Format{is_signed, D}(K, P)
+            uf = Format{UnsignedFormat,D}(K, P)
+            sf = Format{SignedFormat,D}(K, P)
 
             @test nPosFiniteValuesOf(uf) > nPosFiniteValuesOf(sf)
         end
@@ -557,12 +557,12 @@ end
     for K in 2:7
         for P in 1:K
             for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-                            (is_signed, is_finite),  (is_signed, is_extended))
+                (is_signed, is_finite), (is_signed, is_extended))
                 Σ = S === is_signed ? 1 : 0
                 W = K - P + 1 - Σ
                 W >= 1 || continue
 
-                fmt = Format{S, D}(K, P)
+                fmt = Format{S,D}(K, P)
                 @testset "Enum-len K=$K P=$P $(S) $(D)" begin
                     all_fin = AllFiniteValuesOf(fmt)
                     @test length(all_fin) == nFiniteValuesOf(fmt)

@@ -5,7 +5,7 @@ Complete reference for all exported types and functions.
 ## Types and Traits
 
 ```@docs
-ExtendedRational
+Qx64
 Format
 Signedness
 Domain

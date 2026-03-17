@@ -41,12 +41,12 @@ This independently confirms that the formulas match the code-point layout.
 Several test sections verify specific small formats against manually derived
 values.  These serve as regression anchors:
 
-- `Format{is_unsigned, is_finite}(3, 2)` — 8 code points, full value ladder
+- `Format{UnsignedFormat, FiniteFormat}(3, 2)` — 8 code points, full value ladder
   `[0, 1/4, 1/2, 3/4, 1, 3/2, 2]`
-- `Format{is_unsigned, is_finite}(4, 3)` — 16 code points, 3 subnormals
-- `Format{is_signed, is_extended}(4, 2)` — 16 code points, full positive and
+- `Format{UnsignedFormat, FiniteFormat}(4, 3)` — 16 code points, 3 subnormals
+- `Format{SignedFormat, ExtendedFormat}(4, 2)` — 16 code points, full positive and
   negative layout with ±Inf
-- `Format{is_signed, is_finite}(4, 2)` — 16 code points, symmetric signed
+- `Format{SignedFormat, FiniteFormat}(4, 2)` — 16 code points, symmetric signed
   layout without infinities
 
 ### Structural properties

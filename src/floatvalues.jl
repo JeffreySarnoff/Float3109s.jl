@@ -45,16 +45,16 @@ val_pos_normal_min(fmt::Format) = twopow(1 - ExponentBiasOf(fmt))
 
 Exact value of the largest positive finite normal.
 """
-val_pos_normal_max(fmt::Format{is_unsigned,is_finite}) =
+val_pos_normal_max(fmt::Format{UnsignedFormat,FiniteFormat}) =
     (twopow(twopow(ExponentBiasOf(fmt)) - 1)) * (2 - twopow(1 - PrecisionOf(fmt)))
 
-val_pos_normal_max(fmt::Format{is_unsigned,is_extended}) =
+val_pos_normal_max(fmt::Format{UnsignedFormat,ExtendedFormat}) =
     (twopow(twopow(ExponentBiasOf(fmt)) - 1)) * (2 - 3 * twopow(1 - PrecisionOf(fmt)))
 
-val_pos_normal_max(fmt::Format{is_signed,is_finite}) =
+val_pos_normal_max(fmt::Format{SignedFormat,FiniteFormat}) =
     (twopow(twopow(ExponentBiasOf(fmt)) - 1)) * (2 - twopow(1 - PrecisionOf(fmt)))
 
-val_pos_normal_max(fmt::Format{is_signed,is_extended}) =
+val_pos_normal_max(fmt::Format{SignedFormat,ExtendedFormat}) =
     (twopow(twopow(ExponentBiasOf(fmt)) - 1)) * (2 - twopow(2 - PrecisionOf(fmt)))
 
 

@@ -13,7 +13,7 @@ makedocs(
         "Concepts" => "concepts.md",
         "Guide" => [
             "Formats" => "formats.md",
-            "ExtendedRational" => "ExtendedRationals.md",
+            "Qx64" => "Qx64s.md",
             "Counts" => "counts.md",
             "Code Points" => "codepoints.md",
             "Values" => "values.md",

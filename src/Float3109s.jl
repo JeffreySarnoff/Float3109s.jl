@@ -19,7 +19,8 @@ export
     IsUnsigned, IsSigned, is_signed, is_unsigned,
     Domain, FiniteFormat, ExtendedFormat,
     IsFinite, IsExtended, is_finite, is_extended,
-    ExtendedRational, NegInf,
+    is_unsigned_finite, is_unsigned_extended, is_signed_finite, is_signed_extended,
+    Qx64, NegInf,
     Format,
     BitwidthOf, PrecisionOf, TrailingBitsOf, SignBitsOf,
     NonSignificantBitsOf, ExponentBitsOf, ExponentBiasOf,
@@ -49,9 +50,13 @@ export
 
 setprecision(BigFloat, 1024)
 
+using XRationals
+using Quadmath: Float128
+
 include("support.jl")
 include("typing/traits.jl")
 include("typing/types.jl")
+include("typing/accessorsjl")
 include("utils.jl")
 include("counts.jl")
 include("codepoints.jl")

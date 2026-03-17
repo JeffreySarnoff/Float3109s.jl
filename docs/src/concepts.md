@@ -16,8 +16,8 @@ Every P3109 format is defined by four quantities:
 These are encoded as Julia type parameters on [`Format{S,D}`](@ref Format):
 
 ```julia
-Format{is_signed, is_extended}(8, 4)   # K=8, P=4, signed, with infinities
-Format{is_unsigned, is_finite}(8, 4)   # K=8, P=4, unsigned, finite-only
+Format{SignedFormat, ExtendedFormat}(8, 4)   # K=8, P=4, signed, with infinities
+Format{UnsignedFormat, FiniteFormat}(8, 4)   # K=8, P=4, unsigned, finite-only
 ```
 
 ## Derived quantities

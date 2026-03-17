@@ -117,7 +117,7 @@ nNegFiniteValuesOf  == nNegSubnormalsOf + nNegNormalsOf
 ## Example
 
 ```julia
-fmt = Format{is_signed, is_extended}(8, 4)
+fmt = Format{SignedFormat, ExtendedFormat}(8, 4)
 
 nValuesOf(fmt)           # 256
 nFiniteValuesOf(fmt)     # 253   (256 - 1 NaN - 2 Infs)

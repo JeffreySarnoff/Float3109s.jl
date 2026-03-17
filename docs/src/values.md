@@ -138,7 +138,7 @@ ValueOfOrdinalNeg(fmt, i) == -ValueOfOrdinalPos(fmt, i)
 The step size doubles between consecutive normal binades:
 
 ```julia
-fmt = Format{is_unsigned, is_finite}(8, 4)
+fmt = Format{UnsignedFormat, FiniteFormat}(8, 4)
 
 v1 = ValueOf(fmt, cp_pos_normal_min(fmt) + 1) - ValueOf(fmt, cp_pos_normal_min(fmt))
 # ULP in first binade
@@ -152,7 +152,7 @@ v2 == 2 * v1   # true
 ## Example: complete value ladder
 
 ```julia
-fmt = Format{is_unsigned, is_finite}(3, 2)
+fmt = Format{UnsignedFormat, FiniteFormat}(3, 2)
 
 AllFiniteValuesOf(fmt)
 # 7-element Vector{Rational{BigInt}}:

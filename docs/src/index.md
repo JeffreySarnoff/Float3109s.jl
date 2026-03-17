@@ -31,7 +31,7 @@ routines as the ground truth.
 using Float3109s
 
 # An 8-bit, precision-4, signed, extended (has ±Inf) format
-fmt = Format{is_signed, is_extended}(8, 4)
+fmt = Format{SignedFormat, ExtendedFormat}(8, 4)
 
 # Structural counts
 nFiniteValuesOf(fmt)       # total finite values (including zero)

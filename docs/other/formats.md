@@ -34,10 +34,10 @@ Combine the traits as type parameters:
 using Float3109s
 
 # All four variants of an 8-bit, precision-4 format:
-Format{is_unsigned, is_finite}(8, 4)
-Format{is_unsigned, is_extended}(8, 4)
-Format{is_signed,   is_finite}(8, 4)
-Format{is_signed,   is_extended}(8, 4)
+Format{UnsignedFormat, FiniteFormat}(8, 4)
+Format{UnsignedFormat, ExtendedFormat}(8, 4)
+Format{SignedFormat,   FiniteFormat}(8, 4)
+Format{SignedFormat,   ExtendedFormat}(8, 4)
 ```
 
 The constructor enforces `W >= 1` (the exponent field must have at least one
@@ -49,7 +49,7 @@ bit).  This means:
 ### Querying traits
 
 ```julia
-fmt = Format{is_signed, is_extended}(8, 4)
+fmt = Format{SignedFormat, ExtendedFormat}(8, 4)
 
 is_signed(fmt)     # true
 is_unsigned(fmt)    # false
@@ -75,7 +75,7 @@ These functions extract derived structural quantities from a format.
 ### Example
 
 ```julia
-fmt = Format{is_signed, is_extended}(8, 4)
+fmt = Format{SignedFormat, ExtendedFormat}(8, 4)
 
 BitwidthOf(fmt)       # 8
 PrecisionOf(fmt)      # 4

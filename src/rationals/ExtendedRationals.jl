@@ -1,6 +1,6 @@
-# module ExtendedRationals
+# module Qx64s
 
-# export ExtendedRational, NegInf
+# export Qx64, NegInf
 
 import Base: NaN, Inf,
     +, -, *, /, ÷, ^,
@@ -16,7 +16,7 @@ import Base: NaN, Inf,
     real, imag, conj
 
 """
-    ExtendedRational{I<:Integer} <: Real
+    Qx64{I<:Integer} <: Real
 
 Exact rational number type closed under IEEE-style special values.
 
@@ -36,11 +36,11 @@ It provides canonical equality and hashing, total ordering via `isless`,
 promotion/conversion with common numeric types, exact finite arithmetic, and
 IEEE-style closure policies for `NaN` and infinities.
 """
-struct ExtendedRational{I<:Integer} <: Real
+struct Qx64{I<:Integer} <: Real
     num::I
     den::I
 
-    function ExtendedRational{I}(num::I, den::I) where {I<:Integer}
+    function Qx64{I}(num::I, den::I) where {I<:Integer}
         if den == 0
             if num == 0
                 return new{I}(zero(I), zero(I))     # NaN
@@ -72,71 +72,71 @@ end
 # constructors and basic accessors
 # -----------------------------------------------------------------------------
 
-Base.numerator(q::ExtendedRational) = q.num
-Base.denominator(q::ExtendedRational) = q.den
-Base.Tuple(q::ExtendedRational) = (q.num, q.den)
+Base.numerator(q::Qx64) = q.num
+Base.denominator(q::Qx64) = q.den
+Base.Tuple(q::Qx64) = (q.num, q.den)
 
-ExtendedRational{I}(nd::Tuple{<:Integer,<:Integer}) where {I<:Integer} = ExtendedRational{I}(I(nd[1]), I(nd[2]))
-ExtendedRational{I}(num::Integer, den::Integer) where {I<:Integer} = ExtendedRational{I}(I(num), I(den))
-ExtendedRational{I}(num::Integer) where {I<:Integer} = ExtendedRational{I}(I(num), one(I))
-ExtendedRational{I}(x::Rational{<:Integer}) where {I<:Integer} = ExtendedRational{I}(I(numerator(x)), I(denominator(x)))
+Qx64{I}(nd::Tuple{<:Integer,<:Integer}) where {I<:Integer} = Qx64{I}(I(nd[1]), I(nd[2]))
+Qx64{I}(num::Integer, den::Integer) where {I<:Integer} = Qx64{I}(I(num), I(den))
+Qx64{I}(num::Integer) where {I<:Integer} = Qx64{I}(I(num), one(I))
+Qx64{I}(x::Rational{<:Integer}) where {I<:Integer} = Qx64{I}(I(numerator(x)), I(denominator(x)))
 
-function ExtendedRational{I}(x::AbstractFloat) where {I<:Integer}
+function Qx64{I}(x::AbstractFloat) where {I<:Integer}
     if isnan(x)
-        return NaN(ExtendedRational{I})
+        return NaN(Qx64{I})
     elseif isinf(x)
-        return signbit(x) ? NegInf(ExtendedRational{I}) : Inf(ExtendedRational{I})
+        return signbit(x) ? NegInf(Qx64{I}) : Inf(Qx64{I})
     else
         r = Rational{I}(x)
-        return ExtendedRational{I}(numerator(r), denominator(r))
+        return Qx64{I}(numerator(r), denominator(r))
     end
 end
 
-const NegInf = ExtendedRational{BigInt}(-1, 0)
+const NegInf = Qx64{BigInt}(-1, 0)
 
 # -----------------------------------------------------------------------------
 # predicates and simple structure
 # -----------------------------------------------------------------------------
 
-@inline Base.isnan(q::ExtendedRational) = q.den == 0 && q.num == 0
-@inline Base.isfinite(q::ExtendedRational) = q.den != 0
-@inline Base.isinf(q::ExtendedRational) = q.den == 0 && q.num != 0
-@inline Base.iszero(q::ExtendedRational) = q.den != 0 && q.num == 0
-@inline Base.isone(q::ExtendedRational) = q.den == 1 && q.num == 1
-@inline Base.signbit(q::ExtendedRational) = q.num < 0
+@inline Base.isnan(q::Qx64) = q.den == 0 && q.num == 0
+@inline Base.isfinite(q::Qx64) = q.den != 0
+@inline Base.isinf(q::Qx64) = q.den == 0 && q.num != 0
+@inline Base.iszero(q::Qx64) = q.den != 0 && q.num == 0
+@inline Base.isone(q::Qx64) = q.den == 1 && q.num == 1
+@inline Base.signbit(q::Qx64) = q.num < 0
 
-Base.zero(::Type{ExtendedRational{I}}) where {I<:Integer} = ExtendedRational{I}(zero(I))
-Base.zero(::ExtendedRational{I}) where {I<:Integer} = zero(ExtendedRational{I})
-Base.one(::Type{ExtendedRational{I}}) where {I<:Integer} = ExtendedRational{I}(one(I))
-Base.one(::ExtendedRational{I}) where {I<:Integer} = one(ExtendedRational{I})
-Base.oneunit(::Type{ExtendedRational{I}}) where {I<:Integer} = one(ExtendedRational{I})
-Base.oneunit(::ExtendedRational{I}) where {I<:Integer} = one(ExtendedRational{I})
+Base.zero(::Type{Qx64{I}}) where {I<:Integer} = Qx64{I}(zero(I))
+Base.zero(::Qx64{I}) where {I<:Integer} = zero(Qx64{I})
+Base.one(::Type{Qx64{I}}) where {I<:Integer} = Qx64{I}(one(I))
+Base.one(::Qx64{I}) where {I<:Integer} = one(Qx64{I})
+Base.oneunit(::Type{Qx64{I}}) where {I<:Integer} = one(Qx64{I})
+Base.oneunit(::Qx64{I}) where {I<:Integer} = one(Qx64{I})
 
-Base.real(q::ExtendedRational) = q
-Base.imag(::ExtendedRational{I}) where {I<:Integer} = zero(ExtendedRational{I})
-Base.conj(q::ExtendedRational) = q
+Base.real(q::Qx64) = q
+Base.imag(::Qx64{I}) where {I<:Integer} = zero(Qx64{I})
+Base.conj(q::Qx64) = q
 
 # -----------------------------------------------------------------------------
 # promotion and conversion
 # -----------------------------------------------------------------------------
 
-Base.convert(::Type{ExtendedRational{I}}, q::ExtendedRational{I}) where {I<:Integer} = q
-Base.convert(::Type{ExtendedRational{I}}, q::ExtendedRational) where {I<:Integer} = ExtendedRational{I}(I(q.num), I(q.den))
-Base.convert(::Type{ExtendedRational{I}}, x::Integer) where {I<:Integer} = ExtendedRational{I}(x)
-Base.convert(::Type{ExtendedRational{I}}, x::Rational{<:Integer}) where {I<:Integer} = ExtendedRational{I}(x)
-Base.convert(::Type{ExtendedRational{I}}, x::AbstractFloat) where {I<:Integer} = ExtendedRational{I}(x)
+Base.convert(::Type{Qx64{I}}, q::Qx64{I}) where {I<:Integer} = q
+Base.convert(::Type{Qx64{I}}, q::Qx64) where {I<:Integer} = Qx64{I}(I(q.num), I(q.den))
+Base.convert(::Type{Qx64{I}}, x::Integer) where {I<:Integer} = Qx64{I}(x)
+Base.convert(::Type{Qx64{I}}, x::Rational{<:Integer}) where {I<:Integer} = Qx64{I}(x)
+Base.convert(::Type{Qx64{I}}, x::AbstractFloat) where {I<:Integer} = Qx64{I}(x)
 
-Base.promote_rule(::Type{ExtendedRational{I}}, ::Type{<:Integer}) where {I<:Integer} = ExtendedRational{I}
-Base.promote_rule(::Type{ExtendedRational{I}}, ::Type{<:Rational}) where {I<:Integer} = ExtendedRational{I}
-Base.promote_rule(::Type{ExtendedRational{I}}, ::Type{<:AbstractFloat}) where {I<:Integer} = ExtendedRational{I}
-Base.promote_rule(::Type{ExtendedRational{I1}}, ::Type{ExtendedRational{I2}}) where {I1<:Integer, I2<:Integer} = ExtendedRational{promote_type(I1, I2)}
+Base.promote_rule(::Type{Qx64{I}}, ::Type{<:Integer}) where {I<:Integer} = Qx64{I}
+Base.promote_rule(::Type{Qx64{I}}, ::Type{<:Rational}) where {I<:Integer} = Qx64{I}
+Base.promote_rule(::Type{Qx64{I}}, ::Type{<:AbstractFloat}) where {I<:Integer} = Qx64{I}
+Base.promote_rule(::Type{Qx64{I1}}, ::Type{Qx64{I2}}) where {I1<:Integer,I2<:Integer} = Qx64{promote_type(I1, I2)}
 
-function Base.convert(::Type{Rational{I}}, q::ExtendedRational) where {I<:Integer}
+function Base.convert(::Type{Rational{I}}, q::Qx64) where {I<:Integer}
     isfinite(q) || throw(DomainError(q, "cannot convert NaN or infinity to Rational{$I}"))
     return I(numerator(q)) // I(denominator(q))
 end
 
-function Base.convert(::Type{T}, q::ExtendedRational) where {T<:AbstractFloat}
+function Base.convert(::Type{T}, q::Qx64) where {T<:AbstractFloat}
     if isnan(q)
         return T(NaN)
     elseif isinf(q)
@@ -146,29 +146,29 @@ function Base.convert(::Type{T}, q::ExtendedRational) where {T<:AbstractFloat}
     end
 end
 
-Base.float(q::ExtendedRational) = Float64(q)
+Base.float(q::Qx64) = Float64(q)
 
 # -----------------------------------------------------------------------------
 # equality, ordering, hashing
 # -----------------------------------------------------------------------------
 
-function Base.:(==)(a::ExtendedRational, b::ExtendedRational)
+function Base.:(==)(a::Qx64, b::Qx64)
     isnan(a) || isnan(b) && return false
     return a.num == b.num && a.den == b.den
 end
 
-function Base.isequal(a::ExtendedRational, b::ExtendedRational)
+function Base.isequal(a::Qx64, b::Qx64)
     isnan(a) && isnan(b) && return true
     return a.num == b.num && a.den == b.den
 end
 
-function Base.hash(q::ExtendedRational, h::UInt)
+function Base.hash(q::Qx64, h::UInt)
     if isnan(q)
-        return hash((:ExtendedRational, :NaN), h)
+        return hash((:Qx64, :NaN), h)
     elseif isinf(q)
-        return hash((:ExtendedRational, signbit(q) ? -Inf : Inf), h)
+        return hash((:Qx64, signbit(q) ? -Inf : Inf), h)
     else
-        return hash((:ExtendedRational, q.num, q.den), h)
+        return hash((:Qx64, q.num, q.den), h)
     end
 end
 
@@ -177,7 +177,7 @@ A total order compatible with canonical representation.
 Finite values are ordered by value, then `-Inf`, then `+Inf`, then `NaN`
 (NaN is the maximum element of this total order).
 """
-function Base.isless(a::ExtendedRational, b::ExtendedRational)
+function Base.isless(a::Qx64, b::Qx64)
     if isnan(b)
         return !isnan(a)          # everything is less than NaN, except NaN itself
     elseif isnan(a)
@@ -193,128 +193,128 @@ function Base.isless(a::ExtendedRational, b::ExtendedRational)
     end
 end
 
-Base.:<(a::ExtendedRational, b::ExtendedRational) = isless(a, b)
-Base.:<=(a::ExtendedRational, b::ExtendedRational) = !isless(b, a)
-Base.:>(a::ExtendedRational, b::ExtendedRational) = isless(b, a)
-Base.:>=(a::ExtendedRational, b::ExtendedRational) = !isless(a, b)
+Base.:<(a::Qx64, b::Qx64) = isless(a, b)
+Base.:<=(a::Qx64, b::Qx64) = !isless(b, a)
+Base.:>(a::Qx64, b::Qx64) = isless(b, a)
+Base.:>=(a::Qx64, b::Qx64) = !isless(a, b)
 
 # -----------------------------------------------------------------------------
 # helpers for finite arithmetic
 # -----------------------------------------------------------------------------
 
-function _add_finite(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+function _add_finite(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
     g = gcd(a.den, b.den)
     ad = div(a.den, g)
     bd = div(b.den, g)
     n = a.num * bd + b.num * ad
-    iszero(n) && return zero(ExtendedRational{I})
+    iszero(n) && return zero(Qx64{I})
     gn = gcd(abs(n), g)
-    return ExtendedRational{I}(div(n, gn), ad * div(b.den, gn))
+    return Qx64{I}(div(n, gn), ad * div(b.den, gn))
 end
 
-function _mul_finite(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
+function _mul_finite(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
     g1 = gcd(abs(a.num), b.den)
     g2 = gcd(abs(b.num), a.den)
     n1 = div(a.num, g1)
     d1 = div(a.den, g2)
     n2 = div(b.num, g2)
     d2 = div(b.den, g1)
-    return ExtendedRational{I}(n1 * n2, d1 * d2)
+    return Qx64{I}(n1 * n2, d1 * d2)
 end
 
 # -----------------------------------------------------------------------------
 # unary ops and arithmetic
 # -----------------------------------------------------------------------------
 
-Base.abs(q::ExtendedRational{I}) where {I<:Integer} = isnan(q) ? NaN(q) : ExtendedRational{I}(abs(q.num), q.den)
-Base.:+(q::ExtendedRational) = q
-Base.:-(q::ExtendedRational{I}) where {I<:Integer} = ExtendedRational{I}(-q.num, q.den)
+Base.abs(q::Qx64{I}) where {I<:Integer} = isnan(q) ? NaN(q) : Qx64{I}(abs(q.num), q.den)
+Base.:+(q::Qx64) = q
+Base.:-(q::Qx64{I}) where {I<:Integer} = Qx64{I}(-q.num, q.den)
 
-function Base.:+(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
-    isnan(a) || isnan(b) && return NaN(ExtendedRational{I})
-    isinf(a) && isinf(b) && return signbit(a) == signbit(b) ? a : NaN(ExtendedRational{I})
+function Base.:+(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
+    isnan(a) || isnan(b) && return NaN(Qx64{I})
+    isinf(a) && isinf(b) && return signbit(a) == signbit(b) ? a : NaN(Qx64{I})
     isinf(a) && return a
     isinf(b) && return b
     return _add_finite(a, b)
 end
 
-Base.:-(a::ExtendedRational, b::ExtendedRational) = a + (-b)
+Base.:-(a::Qx64, b::Qx64) = a + (-b)
 
-function Base.:*(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
-    isnan(a) || isnan(b) && return NaN(ExtendedRational{I})
-    (isinf(a) && iszero(b)) || (isinf(b) && iszero(a)) && return NaN(ExtendedRational{I})
+function Base.:*(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
+    isnan(a) || isnan(b) && return NaN(Qx64{I})
+    (isinf(a) && iszero(b)) || (isinf(b) && iszero(a)) && return NaN(Qx64{I})
     (isinf(a) || isinf(b)) && return signbit(a) != signbit(b) ?
-                                     NegInf(ExtendedRational{I}) : Inf(ExtendedRational{I})
+                                     NegInf(Qx64{I}) : Inf(Qx64{I})
     return _mul_finite(a, b)
 end
 
-function Base.inv(q::ExtendedRational{I}) where {I<:Integer}
-    isnan(q) && return NaN(ExtendedRational{I})
-    iszero(q) && return Inf(ExtendedRational{I})
-    isinf(q) && return zero(ExtendedRational{I})
-    return ExtendedRational{I}(q.den, q.num)
+function Base.inv(q::Qx64{I}) where {I<:Integer}
+    isnan(q) && return NaN(Qx64{I})
+    iszero(q) && return Inf(Qx64{I})
+    isinf(q) && return zero(Qx64{I})
+    return Qx64{I}(q.den, q.num)
 end
 
-Base.:/(a::ExtendedRational, b::ExtendedRational) = a * inv(b)
+Base.:/(a::Qx64, b::Qx64) = a * inv(b)
 
-function Base.:^(q::ExtendedRational{I}, n::Integer) where {I<:Integer}
-    n == 0 && return one(ExtendedRational{I})       # q^0 = 1 for all q (IEEE convention)
+function Base.:^(q::Qx64{I}, n::Integer) where {I<:Integer}
+    n == 0 && return one(Qx64{I})       # q^0 = 1 for all q (IEEE convention)
     n < 0 && return inv(q)^(-n)
-    isnan(q) && return NaN(ExtendedRational{I})
+    isnan(q) && return NaN(Qx64{I})
     if isinf(q)
-        iseven(n) && return Inf(ExtendedRational{I})
-        return signbit(q) ? NegInf(ExtendedRational{I}) : Inf(ExtendedRational{I})
+        iseven(n) && return Inf(Qx64{I})
+        return signbit(q) ? NegInf(Qx64{I}) : Inf(Qx64{I})
     end
-    return ExtendedRational{I}(q.num^n, q.den^n)
+    return Qx64{I}(q.num^n, q.den^n)
 end
 
 # -----------------------------------------------------------------------------
 # quotient / remainder family
 # -----------------------------------------------------------------------------
 
-function Base.div(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
-    isinf(b) && return zero(ExtendedRational{I})
-    return ExtendedRational{I}(div(a.num * b.den, a.den * b.num), one(I))
+function Base.div(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(Qx64{I})
+    isinf(b) && return zero(Qx64{I})
+    return Qx64{I}(div(a.num * b.den, a.den * b.num), one(I))
 end
 
-function Base.fld(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
-    isinf(b) && return zero(ExtendedRational{I})
-    return ExtendedRational{I}(fld(a.num * b.den, a.den * b.num), one(I))
+function Base.fld(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(Qx64{I})
+    isinf(b) && return zero(Qx64{I})
+    return Qx64{I}(fld(a.num * b.den, a.den * b.num), one(I))
 end
 
-function Base.cld(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
-    isinf(b) && return zero(ExtendedRational{I})
-    return ExtendedRational{I}(cld(a.num * b.den, a.den * b.num), one(I))
+function Base.cld(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(Qx64{I})
+    isinf(b) && return zero(Qx64{I})
+    return Qx64{I}(cld(a.num * b.den, a.den * b.num), one(I))
 end
 
-function Base.rem(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
+function Base.rem(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(Qx64{I})
     isinf(b) && return a
     return a - div(a, b) * b
 end
 
-function Base.mod(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
-    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(ExtendedRational{I})
+function Base.mod(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
+    isnan(a) || isnan(b) || iszero(b) || isinf(a) && return NaN(Qx64{I})
     isinf(b) && return a
     return a - fld(a, b) * b
 end
 
-Base.fld1(a::ExtendedRational, b::ExtendedRational) = fld(a - one(a), b) + one(a)
-Base.mod1(a::ExtendedRational, b::ExtendedRational) = mod(a - one(a), b) + one(a)
+Base.fld1(a::Qx64, b::Qx64) = fld(a - one(a), b) + one(a)
+Base.mod1(a::Qx64, b::Qx64) = mod(a - one(a), b) + one(a)
 
-Base.divrem(a::ExtendedRational, b::ExtendedRational) = (div(a, b), rem(a, b))
-Base.fldmod(a::ExtendedRational, b::ExtendedRational) = (fld(a, b), mod(a, b))
-Base.fldmod1(a::ExtendedRational, b::ExtendedRational) = (fld1(a, b), mod1(a, b))
+Base.divrem(a::Qx64, b::Qx64) = (div(a, b), rem(a, b))
+Base.fldmod(a::Qx64, b::Qx64) = (fld(a, b), mod(a, b))
+Base.fldmod1(a::Qx64, b::Qx64) = (fld1(a, b), mod1(a, b))
 
 # -----------------------------------------------------------------------------
 # gcd / lcm
 # -----------------------------------------------------------------------------
 
 """
-    gcd(a::ExtendedRational, b::ExtendedRational)
+    gcd(a::Qx64, b::Qx64)
 
 For finite values uses the exact rational identity
 `gcd(a/b, c/d) = gcd(a, c) / lcm(b, d)`.
@@ -324,16 +324,16 @@ For non-finite values a closure policy is used:
 - `gcd(±Inf, ±Inf) = +Inf`
 - `gcd(±Inf, x_finite) = abs(x_finite)`
 """
-function Base.gcd(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
-    isnan(a) || isnan(b) && return NaN(ExtendedRational{I})
-    isinf(a) && isinf(b) && return Inf(ExtendedRational{I})
+function Base.gcd(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
+    isnan(a) || isnan(b) && return NaN(Qx64{I})
+    isinf(a) && isinf(b) && return Inf(Qx64{I})
     isinf(a) && return abs(b)
     isinf(b) && return abs(a)
-    return ExtendedRational{I}(gcd(a.num, b.num), lcm(a.den, b.den))
+    return Qx64{I}(gcd(a.num, b.num), lcm(a.den, b.den))
 end
 
 """
-    lcm(a::ExtendedRational, b::ExtendedRational)
+    lcm(a::Qx64, b::Qx64)
 
 For finite values uses the exact rational identity
 `lcm(a/b, c/d) = lcm(a, c) / gcd(b, d)`.
@@ -343,20 +343,20 @@ For non-finite values a closure policy is used:
 - `lcm(0, x) = 0` for finite `x`
 - `lcm(±Inf, x)` is `+Inf` when `x ≠ 0`
 """
-function Base.lcm(a::ExtendedRational{I}, b::ExtendedRational{I}) where {I<:Integer}
-    isnan(a) || isnan(b) && return NaN(ExtendedRational{I})
-    iszero(a) || iszero(b) && return zero(ExtendedRational{I})
-    isinf(a) || isinf(b) && return Inf(ExtendedRational{I})
-    return ExtendedRational{I}(lcm(a.num, b.num), gcd(a.den, b.den))
+function Base.lcm(a::Qx64{I}, b::Qx64{I}) where {I<:Integer}
+    isnan(a) || isnan(b) && return NaN(Qx64{I})
+    iszero(a) || iszero(b) && return zero(Qx64{I})
+    isinf(a) || isinf(b) && return Inf(Qx64{I})
+    return Qx64{I}(lcm(a.num, b.num), gcd(a.den, b.den))
 end
 
 # -----------------------------------------------------------------------------
 # display
 # -----------------------------------------------------------------------------
 
-Base.string(q::ExtendedRational) = sprint(show, q)
+Base.string(q::Qx64) = sprint(show, q)
 
-function Base.show(io::IO, ::MIME"text/plain", q::ExtendedRational)
+function Base.show(io::IO, ::MIME"text/plain", q::Qx64)
     if isnan(q)
         print(io, "NaN")
     elseif isinf(q)
@@ -521,4 +521,4 @@ r3info = required_bits_binary_form([(1,10), (1,6)], [(1,12)])
 @show r3info
 =#
 
-# end # module ExtendedRationals
+# end # module Qx64s

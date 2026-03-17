@@ -4,8 +4,14 @@ authors = ["Jeffrey Sarnoff <jeffrey.sarnoff@ieee.com>"]
 version = "0.1.0"
 
 [compat]
-julia = "1.12"
+XRationals = "0.1 - 0.5"
+Quadmath = "1"
 Documenter = "1"
+julia = "1.12"
+
+[deps]
+XRationals = "f354a88b-0804-406d-a35b-636616acac82"
+Quadmath = "be4d8f0f-7fa4-5f49-b795-2f01399ab2dd"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

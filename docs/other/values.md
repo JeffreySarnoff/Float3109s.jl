@@ -1,13 +1,13 @@
 # Values
 
 The functions in `floatvalues.jl` and `values.jl` decode code points into
-their exact rational values as `ExtendedRational` values (see
-[ExtendedRational](@ref) for the type definition).
+their exact rational values as `Qx64` values (see
+[Qx64](@ref) for the type definition).
 
 ## Decoding a single code point
 
 ```julia
-FiniteValueOf(fmt, cp) -> ExtendedRational
+FiniteValueOf(fmt, cp) -> Qx64
 ```
 
 Returns the exact value of code point `cp` in format `fmt`.
@@ -81,7 +81,7 @@ val_ordinal_ith_pos_subnormal(fmt, i) = i * 2^(2 - P - B)
 ### All finite values
 
 ```julia
-AllFiniteValuesOf(fmt) -> Vector{ExtendedRational}
+AllFiniteValuesOf(fmt) -> Vector{Qx64}
 ```
 
 Returns every finite value in code-point order.  Zero is included; NaN and
@@ -91,7 +91,7 @@ infinities are excluded.  For signed formats, the order is:
 ### Positive finite values only
 
 ```julia
-AllPositiveFiniteValuesOf(fmt) -> Vector{ExtendedRational}
+AllPositiveFiniteValuesOf(fmt) -> Vector{Qx64}
 ```
 
 Returns every positive finite value in code-point order.  Zero is excluded.
@@ -139,7 +139,7 @@ FiniteValueOfOrdinalNeg(fmt, i) == -FiniteValueOfOrdinalPos(fmt, i)
 The step size doubles between consecutive normal binades:
 
 ```julia
-fmt = Format{is_unsigned, is_finite}(8, 4)
+fmt = Format{UnsignedFormat, FiniteFormat}(8, 4)
 
 v1 = FiniteValueOf(fmt, cp_pos_normal_min(fmt) + 1) - FiniteValueOf(fmt, cp_pos_normal_min(fmt))
 # ULP in first binade
@@ -153,10 +153,10 @@ v2 == 2 * v1   # true
 ## Example: complete value ladder
 
 ```julia
-fmt = Format{is_unsigned, is_finite}(3, 2)
+fmt = Format{UnsignedFormat, FiniteFormat}(3, 2)
 
 AllFiniteValuesOf(fmt)
-# 7-element Vector{ExtendedRational}:
+# 7-element Vector{Qx64}:
 #  0//1  1//4  1//2  3//4  1//1  3//2  2//1
 ```
 

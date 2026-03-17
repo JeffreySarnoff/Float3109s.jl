@@ -1,9 +1,9 @@
-# ExtendedRational
+# Qx64
 
-`ExtendedRational` is the exact rational number type used throughout Float3109s.jl.
+`Qx64` is the exact rational number type used throughout Float3109s.jl.
 It extends Julia's rational arithmetic to include the three IEEE-style special
 values NaN, +Inf, and -Inf, forming a *closed* number system where every
-operation returns a `ExtendedRational`.
+operation returns a `Qx64`.
 
 ## Canonical representation
 
@@ -26,21 +26,21 @@ The inner constructor enforces these invariants automatically:
 ## Construction
 
 ```julia
-ExtendedRational(3, 4)          # 3//4
-ExtendedRational(6, 8)          # 3//4 (auto-reduced)
-ExtendedRational(-1, 0)         # -Inf
-ExtendedRational(0, 0)          # NaN
+Qx64(3, 4)          # 3//4
+Qx64(6, 8)          # 3//4 (auto-reduced)
+Qx64(-1, 0)         # -Inf
+Qx64(0, 0)          # NaN
 
-ExtendedRational(1.5)           # 3//2 (from Float64)
-ExtendedRational(Float32(0.1))  # exact Float32 rational
-ExtendedRational(Inf)           # Inf
-ExtendedRational(NaN)           # NaN
+Qx64(1.5)           # 3//2 (from Float64)
+Qx64(Float32(0.1))  # exact Float32 rational
+Qx64(Inf)           # Inf
+Qx64(NaN)           # NaN
 
-ExtendedRational(3//4)          # from Julia Rational
+Qx64(3//4)          # from Julia Rational
 
-NaN(ExtendedRational)           # NaN
-Inf(ExtendedRational)           # +Inf
-NegInf(ExtendedRational)        # -Inf
+NaN(Qx64)           # NaN
+Inf(Qx64)           # +Inf
+NegInf(Qx64)        # -Inf
 ```
 
 Integer arguments of any `Integer` subtype are accepted and promoted to `BigInt`.
@@ -130,8 +130,8 @@ Special cases:
 ## Display
 
 ```julia
-julia> q = ExtendedRational(3, 4)
-ExtendedRational(3//4)          # REPL (text/plain)
+julia> q = Qx64(3, 4)
+Qx64(3//4)          # REPL (text/plain)
 
 julia> print(q)
 3//4                          # compact (IO)
@@ -139,7 +139,7 @@ julia> print(q)
 julia> string(q)
 "3//4"
 
-julia> string(NaN(ExtendedRational))
+julia> string(NaN(Qx64))
 "NaN"
 ```
 
@@ -154,6 +154,6 @@ Tuple(q)        # (num, den) as a tuple
 ## Why not `Rational{BigInt}`?
 
 Julia's built-in `Rational{BigInt}` has no representation for NaN or ±Inf.
-Since P3109 formats include these special values, `ExtendedRational` provides
+Since P3109 formats include these special values, `Qx64` provides
 a single unified type that can represent *every* code-point value exactly,
 eliminating the need for separate marker types or `Union` dispatch.

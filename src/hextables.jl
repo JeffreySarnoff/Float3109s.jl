@@ -31,17 +31,14 @@ for K in MinK:MaxK
             else
                 fmt = Format{UnsignedFormat,domain}(K, P)
             end
-            values = AllHexStringValuesOf(fmt)
-            localtable = columntable((; codepoint=codepoints, hexstring=values))
+            values = AllValuesOf(fmt)
+            hexstring_valeus = map(hex_sprintf, values)
+            localtable = columntable((; codepoint=codepoints, hexstring=hexstring_values))
             writetable(fourpaths[Symbol(fmtkind)], localtable)
         end
     end
 end
 
-function AllHexStringValuesOf(fmt::Format{signedness,domain}) where {signedness,domain}
-    values = AllValuesOf(fmt)
-    map(hex_sprintf, values)
-end
 
 function writetable(path, table)
     CSV.write(path, table)

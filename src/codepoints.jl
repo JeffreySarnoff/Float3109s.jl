@@ -47,7 +47,6 @@ cp_negtwo(fmt::Format{UnsignedFormat,T}) where {T} = nothing
 cp_negtwo(fmt::Format{SignedFormat,T}) where {T} = 3 * twopow(BitwidthOf(fmt) - 2) + twopow(PrecisionOf(fmt) - 1)
 
 
-
 """Code point of zero (always 0)."""
 cp_zero(fmt::Format) = zero(typeofcp(fmt))
 

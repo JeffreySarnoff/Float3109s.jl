@@ -1,6 +1,64 @@
 # values.jl — decode the ith code point of any Format to its exact value
 
 """
+    AllHexStringValuesOf(fmt) -> Vector{Qx64}
+
+Return the exact rational values as "%a" sprintf strings for every code point
+in `fmt`, in code-point order.  Special code points map to the canonical forms:
+
+Special code points map to the canonical string forms:
+
+- zero  → `0//1`
+- +Inf  → "Inf"`
+- -Inf  → "-Inf"`
+- NaN   → "NaN"`
+"""
+function AllHexStringValuesOf(@nospecialize(fmt::Format))
+    vals = Qx64[]
+    sizehint!(vals, Int(nValuesOf(fmt)))
+    cp_of_nan = cp_nan(fmt)
+    for cp in Int128(0):Int128(cp_max(fmt))
+        if cp == cp_of_nan
+            push!(vals, Qx64(1, 0))
+            continue
+        end
+        push!(vals, ValueOf(fmt, cp))
+    end
+    return vals
+end
+
+"""
+    HexStringValueOf(fmt, cp) -> Rational{BigInt}
+
+Return the exact HexString ("%a" sprintf) value of code point `cp`
+in format `fmt`.
+
+Special code points map to the canonical string forms:
+
+- zero  → `0//1`
+- +Inf  → "Inf"`
+- -Inf  → "-Inf"`
+- NaN   → "NaN"`
+
+For finite numerical code points the result is an exact dyadic rational.
+"""
+function HexStringValueOf(@nospecialize(fmt::Format), cp::Integer)
+    0 <= cp <= cp_max(fmt) || throw(ArgumentError("code point $cp out of range [0, $(cp_max(fmt))]"))
+
+    cp == cp_nan(fmt) && return "NaN"
+    cp == cp_zero(fmt) && return Qx64(0, 1)
+
+    cp = cp_inf(fmt)
+    cp !== nothing && return Qx64(1, 0)
+    cp = cp_neginf(fmt)
+    cp !== nothing && Qx64(-1, 0)
+
+    red = sign_reduce(fmt, cp)
+    val = _decode_positive_half(fmt, red.cp_abs)
+    return red.s == 0 ? val : -val
+end
+
+"""
     AllValuesOf(fmt) -> Vector{Qx64}
 
 Return the exact rational values for every code point in `fmt`, in
@@ -12,7 +70,7 @@ function AllValuesOf(@nospecialize(fmt::Format))
     cp_of_nan = cp_nan(fmt)
     for cp in Int128(0):Int128(cp_max(fmt))
         if cp == cp_of_nan
-            push!(vals, Qx64(37269879, 37269871))
+            push!(vals, Qx64(1, 0))
             continue
         end
         push!(vals, ValueOf(fmt, cp))

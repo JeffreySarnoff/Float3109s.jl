@@ -15,9 +15,11 @@ for K in MinK:MaxK
         subsubdir = string("P", P)
         subsubpath = joinpath(subpath, subsubdir)
         basename = string("Binary", K, "p", P)
-        fournames = (; uf=string(basename, "uf", Ext), ue=string(basename, "ue", Ext),
+        fournames = (;
+            uf=string(basename, "uf", Ext), ue=string(basename, "ue", Ext),
             sf=string(basename, "sf", Ext), se=string(basename, "se", Ext))
-        fourpaths = (; uf=joinpath(subsubpath, fournames.uf), ue=joinpath(subsubpath, fournames.ue),
+        fourpaths = (;
+            uf=joinpath(subsubpath, fournames.uf), ue=joinpath(subsubpath, fournames.ue),
             sf=joinpath(subsubpath, fournames.sf), se=joinpath(subsubpath, fournames.se))
         for fmtkind in keys(fourpaths)
             signedness, domain = FmtKinds[Symbol(fmtkind)]

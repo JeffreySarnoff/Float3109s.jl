@@ -107,8 +107,8 @@ end
 """
     AllPositiveFiniteValuesOf(fmt) -> Vector{Qx64}
 
-Return the exact rational values for every positive finite code point
-in `fmt`, in code-point order.  Zero is excluded.
+Return the exact rational values for every strictly positive
+finite code point in `fmt`, in code-point order.  Zero is excluded.
 """
 function AllPositiveFiniteValuesOf(@nospecialize(fmt::Format))
     vals = Qx64[]
@@ -154,27 +154,16 @@ end
 
 
 """
-    AllPositiveFiniteValuesOf(fmt) -> Vector{Qx64}
+    AllNegativeFiniteValuesOf(fmt) -> Vector{Qx64}
 
-Return the exact rational values for every positive finite code point
-in `fmt`, in code-point order.  Zero is excluded.
+Return the exact rational values for every strictly negative
+finite code point in `fmt`, in code-point order.
 """
-function AllPositiveFiniteValuesOf(@nospecialize(fmt::Format))
-    vals = Qx64[]
-    sizehint!(vals, Int(nPosFiniteValuesOf(fmt)))
+function AllNegativeFiniteValuesOf(@nospecialize(fmt::Format))
+    is_unsigned(fmt) && return nothing
 
-    cpstart = BigInt(cp_zero(fmt)) + 1
-    cpend = BigInt(cp_nan(fmt)) - 1
-
-    inf_cp = cp_inf(fmt)
-    if inf_cp !== nothing
-        cpend = min(cpend, BigInt(inf_cp) - 1)
-    end
-
-    for cp in cpstart:cpend
-        push!(vals, FiniteValueOf(fmt, cp))
-    end
-    return vals
+    posvals = AllPositiveFiniteValuesOf(fmt)
+    map(-, posvals)
 end
 
 # =========================================================================

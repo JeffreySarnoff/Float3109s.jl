@@ -52,7 +52,7 @@ function HexStringValueOf(@nospecialize(fmt::Format), cp::Integer)
 
     red = sign_reduce(fmt, cp)
     val = _decode_positive_half(fmt, red.cp_abs)
-    return red.s == 0 ? val : -val
+    return hex_sprintf(red.s == 0 ? val : -val)
 end
 
 """

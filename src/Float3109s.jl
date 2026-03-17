@@ -50,10 +50,14 @@ export
 
 setprecision(BigFloat, 1024)
 
-# using XRationals: Qx32, Qx64
 Qx64 = Rational{BigInt}
 
-using Quadmath: Float128
+using Tables, CSV
+
+using Printf
+hex_sprintf(x) = @sprintf("%a", BigFloat(x))
+
+const P3109Base = s"C:/git/P3109/"
 
 include("support.jl")
 include("typing/traits.jl")
@@ -64,5 +68,6 @@ include("counts.jl")
 include("codepoints.jl")
 include("floatvalues.jl")
 include("values.jl")
+include("writehex.jl")
 
 end # module

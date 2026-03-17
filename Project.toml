@@ -4,13 +4,18 @@ authors = ["Jeffrey Sarnoff <jeffrey.sarnoff@ieee.com>"]
 version = "0.1.0"
 
 [compat]
-XRationals = "0.1 - 0.5"
+Printf = "1.11"
 Quadmath = "1"
 Documenter = "1"
+Tables = "1.12"
+CSV = "0.10 - 0.20"
+version = "0.10.16"
 julia = "1.12"
 
 [deps]
-XRationals = "f354a88b-0804-406d-a35b-636616acac82"
+Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
+Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 Quadmath = "be4d8f0f-7fa4-5f49-b795-2f01399ab2dd"
 
 [extras]

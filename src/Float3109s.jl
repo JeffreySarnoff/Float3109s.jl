@@ -56,7 +56,7 @@ using Quadmath: Float128
 include("support.jl")
 include("typing/traits.jl")
 include("typing/types.jl")
-include("typing/accessorsjl")
+include("typing/accessors.jl")
 include("utils.jl")
 include("counts.jl")
 include("codepoints.jl")

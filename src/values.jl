@@ -14,7 +14,7 @@ Special code points map to the canonical string forms:
 - NaN   → "NaN"`
 """
 function AllHexStringValuesOf(@nospecialize(fmt::Format))
-    vals = Qx64[]
+    vals = String[]
     sizehint!(vals, Int(nValuesOf(fmt)))
 
     for cp in Int128(0):Int128(cp_max(fmt))

@@ -45,10 +45,10 @@ function HexStringValueOf(@nospecialize(fmt::Format), cp::Integer)
     cp == cp_nan(fmt) && return "NaN"
     cp == cp_zero(fmt) && return hex_sprintf(Qx64(0, 1))
 
-    cp = cp_inf(fmt)
-    cp !== nothing && return hex_sprintf(Qx64(1, 0))
-    cp = cp_neginf(fmt)
-    cp !== nothing && return hex_sprintf(Qx64(-1, 0))
+    inf_cp = cp_inf(fmt)
+    inf_cp !== nothing && cp == inf_cp && return hex_sprintf(Qx64(1, 0))
+    ninf_cp = cp_neginf(fmt)
+    ninf_cp !== nothing && cp == ninf_cp && return hex_sprintf(Qx64(-1, 0))
 
     red = sign_reduce(fmt, cp)
     val = _decode_positive_half(fmt, red.cp_abs)

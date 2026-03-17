@@ -650,12 +650,12 @@ function ValueOf(@nospecialize(fmt::Format), cp::Integer)
     0 <= cp <= cp_max(fmt) || throw(ArgumentError("code point $cp out of range [0, $(cp_max(fmt))]"))
 
     cp == cp_zero(fmt) && return zero(Qx64)
-    cp == cp_nan(fmt) && return NaN(Qx64)
+    cp == cp_nan(fmt) && return Qx64(NaN)
 
     inf_cp = cp_inf(fmt)
-    inf_cp !== nothing && cp == inf_cp && return Inf(Qx64)
+    inf_cp !== nothing && cp == inf_cp && return Qx64(Inf)
     ninf_cp = cp_neginf(fmt)
-    ninf_cp !== nothing && cp == ninf_cp && return NegInf(Qx64)
+    ninf_cp !== nothing && cp == ninf_cp && return NegQx64(Inf)
 
     red = sign_reduce(fmt, cp)
     val = _decode_positive_half(fmt, red.cp_abs)

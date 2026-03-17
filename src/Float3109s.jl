@@ -50,7 +50,7 @@ export
 
 setprecision(BigFloat, 1024)
 
-using XRationals
+using XRationals: Qx32, Qx64
 using Quadmath: Float128
 
 include("support.jl")

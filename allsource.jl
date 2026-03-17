@@ -719,7 +719,7 @@ Return the exact rational values for every finite numerical code point
 in `fmt`, in code-point order.  Zero is included; NaN and ±Inf are excluded.
 """
 function AllFiniteValuesOf(@nospecialize(fmt::Format))
-    vals = Qx64{BigInt}[]
+    vals = Qx64[]
     sizehint!(vals, Int(nFiniteValuesOf(fmt)) + 1)
 
     nan_cp = cp_nan(fmt)
@@ -742,7 +742,7 @@ Return the exact rational values for every positive finite code point
 in `fmt`, in code-point order.  Zero is excluded.
 """
 function AllPositiveFiniteValuesOf(@nospecialize(fmt::Format))
-    vals = Qx64{BigInt}[]
+    vals = Qx64[]
     sizehint!(vals, Int(nPosFiniteValuesOf(fmt)))
 
     cpstart = BigInt(cp_zero(fmt)) + 1

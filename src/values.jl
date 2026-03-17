@@ -16,13 +16,10 @@ Special code points map to the canonical string forms:
 function AllHexStringValuesOf(@nospecialize(fmt::Format))
     vals = Qx64[]
     sizehint!(vals, Int(nValuesOf(fmt)))
-    cp_of_nan = cp_nan(fmt)
+
     for cp in Int128(0):Int128(cp_max(fmt))
-        if cp == cp_of_nan
-            push!(vals, Qx64(1, 0))
-            continue
-        end
-        push!(vals, ValueOf(fmt, cp))
+        hexstring = HexStringValueOf(fmt, cp)
+        push!(vals, hexstring)
     end
     return vals
 end

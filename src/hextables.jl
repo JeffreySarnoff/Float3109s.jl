@@ -31,7 +31,7 @@ for K in MinK:MaxK
             else
                 fmt = Format{UnsignedFormat,domain}(K, P)
             end
-            values = AllValuesOf(fmt)
+            values = AllHexStringValuesOf(fmt)
             hexstring_values = map(hex_sprintf, values)
             localtable = columntable((; codepoint=codepoints, hexstring=hexstring_values))
             # writetable(fourpaths[Symbol(fmtkind)], localtable)

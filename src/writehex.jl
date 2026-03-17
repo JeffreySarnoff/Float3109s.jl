@@ -8,22 +8,6 @@ for k in 3:16
 end
 
 
-function save_uf_table(ufpath, uftable)
-    CSV.write(ufpath, uftable)
-end
-
-function get_uf_table(codepoints, K, P, cp_nan)
-    values =
-        table = Vector{Tuple{UInt64,String}}()
-    for cp in UInt64(0):UInt64(cp_nan - 1)
-        finite_vals = AllFiniteValuesOf(Format{UnsignedFormat,FiniteFormat}(K, P))
-        finite_strs = map(hex_sprintf, finite_vals)
-        strs = push!(finite_strs, "NaN")
-        vals = finite_valspush!(table, (cp, hex_sprintf(val)))
-    end
-    return columntable((; codepoint=vals, hexstring=strs))
-end
-
 for k in 3:16
     finalcodepoint = 0x0002^k - 0x0001
     codepoints = collect(k <= 8 ? collect(0x00:UInt8(finalcodepoint)) : collect(0x0000:UInt16(finalcodepoint)))
@@ -39,7 +23,7 @@ for k in 3:16
         sfpath = joinpath(currpath, string(filebasename, "sf", ".csv"))
         sepath = joinpath(currpath, string(filebasename, "se", ".csv"))
 
-        uftable = invoke_latest(get_uf_table(codepoints, K, P, cp_unsigned_nan))
+        uftable = get_uf_table(codepoints, K, P, cp_unsigned_nan)
         save_uf_table(ufpath, uftable)
         uetable = get_ue_table(codepoints, K, P, cp_unsigned_nan)
         sftable = get_sf_table(codepoints, K, P, cp_signed_nan)
@@ -60,3 +44,19 @@ for k in 3:16
     save_ue_table(uepath, uetable)
 end
 
+
+function save_uf_table(ufpath, uftable)
+    CSV.write(ufpath, uftable)
+end
+
+function get_uf_table(codepoints, K, P, cp_nan)
+    values =
+        table = Vector{Tuple{UInt64,String}}()
+    for cp in UInt64(0):UInt64(cp_nan - 1)
+        finite_vals = AllFiniteValuesOf(Format{UnsignedFormat,FiniteFormat}(K, P))
+        finite_strs = map(hex_sprintf, finite_vals)
+        strs = push!(finite_strs, "NaN")
+        vals = finite_valspush!(table, (cp, hex_sprintf(val)))
+    end
+    return columntable((; codepoint=vals, hexstring=strs))
+end

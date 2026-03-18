@@ -48,7 +48,7 @@ function HexStringValueOf(@nospecialize(fmt::Format), cp::Integer)
     inf_cp = cp_inf(fmt)
     inf_cp !== nothing && cp == inf_cp && return hex_sprintf(Qx64(1, 0))
     ninf_cp = cp_neginf(fmt)
-    ninf_cp !== nothing && cp == ninf_cp && return hex_sprintf(Qx64(-1, 0))
+    ninf_cp !== nothing && cp == ninf_cp && return "NegInf"
 
     red = sign_reduce(fmt, cp)
     val = _decode_positive_half(fmt, red.cp_abs)

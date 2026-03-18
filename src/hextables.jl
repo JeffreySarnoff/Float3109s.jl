@@ -5,9 +5,10 @@ const FmtKinds = (;
     se=(SignedFormat, ExtendedFormat))
 
 codetype(K) = K <= 8 ? UInt8 : K <= 16 ? UInt16 : K <= 32 ? UInt32 : UInt64
+hex_codepoint(K, x) = K <= 8 ? @sprintf("0x%02x", x) : @sprintf("0x%04x", x)
 
 for K in MinK:MaxK
-    codepoints = map(codetype(K), collect(0:twopow(K)-1))
+    codepoints = map(x -> hex_codepoint(K, x), collect(0:twopow(K)-1))
 
     subdir = string("K", K)
     subpath = joinpath(HexStringsBase, subdir)

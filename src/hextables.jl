@@ -22,6 +22,10 @@ for K in MinK:MaxK
         fourpaths = (;
             uf=aspath(subsubpath, fournames.uf), ue=aspath(subsubpath, fournames.ue),
             sf=aspath(subsubpath, fournames.sf), se=aspath(subsubpath, fournames.se))
+        twonames = (;
+            uf=string(basename, "uf", Ext), ue=string(basename, "ue", Ext))
+        twopaths = (;
+            uf=aspath(subsubpath, twonames.uf), ue=aspath(subsubpath, twonames.ue))
 
         tables = []
 
@@ -29,13 +33,20 @@ for K in MinK:MaxK
             signedness, domain = FmtKinds[Symbol(fmtkind)]
             if P < K
                 fmt = Format{signedness,domain}(K, P)
-            else
-                fmt = Format{UnsignedFormat,domain}(K, P)
+                hexstring_values = AllHexStringValuesOf(fmt)
+                localtable = columntable((; codepoint=codepoints, sprintf_a=hexstring_values))
+                CSV.write(fourpaths[Symbol(fmtkind)], localtable)
             end
-            hexstring_values = AllHexStringValuesOf(fmt)
-            localtable = columntable((; codepoint=codepoints, sprintf_a=hexstring_values))
-            # writetable(fourpaths[Symbol(fmtkind)], localtable)
-            CSV.write(fourpaths[Symbol(fmtkind)], localtable)
+        end
+
+        for fmtkind in keys(twopaths)
+            signedness, domain = FmtKinds[Symbol(fmtkind)]
+            if P == K
+                fmt = Format{signedness,domain}(K, P)
+                hexstring_values = AllHexStringValuesOf(fmt)
+                localtable = columntable((; codepoint=codepoints, sprintf_a=hexstring_values))
+                CSV.write(twopaths[Symbol(fmtkind)], localtable)
+            end
         end
     end
 end

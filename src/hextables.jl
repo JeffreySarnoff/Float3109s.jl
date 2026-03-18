@@ -31,8 +31,7 @@ for K in MinK:MaxK
             else
                 fmt = Format{UnsignedFormat,domain}(K, P)
             end
-            values = AllHexStringValuesOf(fmt)
-            hexstring_values = map(hex_sprintf, values)
+            hexstring_values = AllHexStringValuesOf(fmt)
             localtable = columntable((; codepoint=codepoints, hexstring=hexstring_values))
             # writetable(fourpaths[Symbol(fmtkind)], localtable)
             CSV.write(fourpaths[Symbol(fmtkind)], localtable)

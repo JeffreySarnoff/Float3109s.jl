@@ -7,6 +7,32 @@ const FmtKinds = (;
 codetype(K) = K <= 8 ? UInt8 : K <= 16 ? UInt16 : K <= 32 ? UInt32 : UInt64
 hex_codepoint(K, x) = K <= 8 ? @sprintf("0x%02x", x) : @sprintf("0x%04x", x)
 
+
+const SubnormalIcon = '↯'
+
+function AllSubnormalIconsOf(fmt::Format)
+    subnormal_icons = fill(' ', nValuesOf(fmt))
+    PrecisionOf(fmt) == 1 && return subnormal_icons
+
+    npos_subnormals = nPosSubnormalsOf(fmt)
+    nneg_subnormals = is_signed(fmt) ? nNegSubnormalsOf(fmt) : 0
+
+    cpnan = cp_nan(fmt)
+
+    cp_firstpos_subnormal = 0x01
+    cp_lastpos_subnormal = npos_subnormals
+
+    cp_firstneg_subnormal = is_signed(fmt) ? cpnan + 0x01 : -1
+    cp_lastneg_subnormal = is_signed(fmt) ? cpnan + nneg_subnormals : -1
+
+    subnormal_icons[cp_firstpos_subnormal:cp_lastpos_subnormal] .= SubnormalIcon
+    if is_signed(fmt)
+        subnormal_icons[cp_firstneg_subnormal:cp_lastneg_subnormal] .= SubnormalIcon
+    end
+
+    subnormal_icons
+end
+
 for K in MinK:MaxK
     codepoints = map(x -> hex_codepoint(K, x), collect(0:twopow(K)-1))
 
@@ -52,29 +78,4 @@ for K in MinK:MaxK
             CSV.write(twopaths[Symbol(fmtkind)], localtable)
         end
     end
-end
-
-const SubnormalIcon = '↯'
-
-function AllSubnormalIconsOf(fmt::Format)
-    subnormal_icons = fill(' ', nValuesOf(fmt))
-    PrecsionOf(fmt) == 1 && return subnormal_icons
-
-    npos_subnormals = nPosSubnormalsOf(fmt)
-    nneg_subnormals = is_signed(fmt) ? nNegSubnormalsOf(fmt) : 0
-
-    cpnan = cp_nan(fmt)
-
-    cp_firstpos_subnormal = 0x01
-    cp_lastpos_subnormal = npos_subnormals
-
-    cp_firstneg_subnormal = is_signed(fmt) ? cpnan + 0x01 : -1
-    cp_lastneg_subnormal = is_signed(fmt) ? cpnan + nneg_subnormals : -1
-
-    subnormal_icons[cp_firstpos_subnormal:cp_lastpos_subnormal] .= SubnormalIcon
-    if is_signed(fmt)
-        subnormal_icons[cp_firstneg_subnormal:cp_lastneg_subnormal] .= SubnormalIcon
-    end
-
-    subnormal_icons
 end

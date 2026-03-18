@@ -58,8 +58,9 @@ using Printf
 hex_sprintf(x) = @sprintf("%a", BigFloat(x))
 
 const P3109Base = s"C:/git/P3109/"
-
 const Ext = ".csv"
+
+aspath(parts...) = realpath(joinpath(parts...))
 
 const MinK = 3
 const MaxK = 16

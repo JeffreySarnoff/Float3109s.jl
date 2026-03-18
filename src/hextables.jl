@@ -12,7 +12,7 @@ for K in MinK:MaxK
 
     subdir = string("K", K)
     subpath = aspath(HexStringsBase, subdir)
-    for P in 1:K
+    for P in 1:K-1
         subsubdir = string("P", P)
         subsubpath = aspath(subpath, subsubdir)
         basename = string("Binary", K, "p", P)
@@ -22,31 +22,32 @@ for K in MinK:MaxK
         fourpaths = (;
             uf=aspath(subsubpath, fournames.uf), ue=aspath(subsubpath, fournames.ue),
             sf=aspath(subsubpath, fournames.sf), se=aspath(subsubpath, fournames.se))
+
+        for fmtkind in keys(fourpaths)
+            signedness, domain = FmtKinds[Symbol(fmtkind)]
+            fmt = Format{signedness,domain}(K, P)
+            hexstring_values = AllHexStringValuesOf(fmt)
+            localtable = columntable((; codepoint=codepoints, sprintf_a=hexstring_values))
+            CSV.write(fourpaths[Symbol(fmtkind)], localtable)
+        end
+    end
+
+    for P in K:K
+        subsubdir = string("P", P)
+        subsubpath = aspath(subpath, subsubdir)
+        basename = string("Binary", K, "p", P)
+
         twonames = (;
             uf=string(basename, "uf", Ext), ue=string(basename, "ue", Ext))
         twopaths = (;
             uf=aspath(subsubpath, twonames.uf), ue=aspath(subsubpath, twonames.ue))
 
-        tables = []
-
-        for fmtkind in keys(fourpaths)
-            signedness, domain = FmtKinds[Symbol(fmtkind)]
-            if P < K
-                fmt = Format{signedness,domain}(K, P)
-                hexstring_values = AllHexStringValuesOf(fmt)
-                localtable = columntable((; codepoint=codepoints, sprintf_a=hexstring_values))
-                CSV.write(fourpaths[Symbol(fmtkind)], localtable)
-            end
-        end
-
         for fmtkind in keys(twopaths)
             signedness, domain = FmtKinds[Symbol(fmtkind)]
-            if P == K
-                fmt = Format{signedness,domain}(K, P)
-                hexstring_values = AllHexStringValuesOf(fmt)
-                localtable = columntable((; codepoint=codepoints, sprintf_a=hexstring_values))
-                CSV.write(twopaths[Symbol(fmtkind)], localtable)
-            end
+            fmt = Format{signedness,domain}(K, P)
+            hexstring_values = AllHexStringValuesOf(fmt)
+            localtable = columntable((; codepoint=codepoints, sprintf_a=hexstring_values))
+            CSV.write(twopaths[Symbol(fmtkind)], localtable)
         end
     end
 end

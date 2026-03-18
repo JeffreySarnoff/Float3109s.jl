@@ -63,7 +63,7 @@ const Ext = ".csv"
 aspath(parts...) = abspath(parts...)
 
 const MinK = 3
-const MaxK = 16
+const MaxK = 17
 
 include("support.jl")
 include("typing/traits.jl")

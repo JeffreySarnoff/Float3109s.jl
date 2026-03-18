@@ -8,10 +8,12 @@ codetype(K) = K <= 8 ? UInt8 : K <= 16 ? UInt16 : K <= 32 ? UInt32 : UInt64
 hex_codepoint(K, x) = K <= 8 ? @sprintf("0x%02x", x) : @sprintf("0x%04x", x)
 
 
-const SubnormalIcon = "ς"
+const SubnormalIcon = "!"
 
 function AllSubnormalIconsOf(fmt::Format)
-    subnormal_icons = fill(" ", nValuesOf(fmt))
+    subnormal_icons = Vector{String}(undef, nValuesOf(fmt))
+    subnormal_icons .= " "
+
     PrecisionOf(fmt) == 1 && return subnormal_icons
 
     npos_subnormals = nPosSubnormalsOf(fmt)
@@ -19,11 +21,11 @@ function AllSubnormalIconsOf(fmt::Format)
 
     cpnan = cp_nan(fmt)
 
-    cp_firstpos_subnormal = 0x01
-    cp_lastpos_subnormal = npos_subnormals
+    cp_firstpos_subnormal = 0x01 + 1
+    cp_lastpos_subnormal = npos_subnormals + 1
 
-    cp_firstneg_subnormal = is_signed(fmt) ? cpnan + 0x01 : -1
-    cp_lastneg_subnormal = is_signed(fmt) ? cpnan + nneg_subnormals : -1
+    cp_firstneg_subnormal = is_signed(fmt) ? cpnan + 0x01 + 1 : -1
+    cp_lastneg_subnormal = is_signed(fmt) ? cpnan + nneg_subnormals + 1 : -1
 
     subnormal_icons[cp_firstpos_subnormal:cp_lastpos_subnormal] .= SubnormalIcon
     if is_signed(fmt)

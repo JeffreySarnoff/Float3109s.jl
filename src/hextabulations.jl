@@ -8,10 +8,10 @@ codetype(K) = K <= 8 ? UInt8 : K <= 16 ? UInt16 : K <= 32 ? UInt32 : UInt64
 hex_codepoint(K, x) = K <= 8 ? @sprintf("0x%02x", x) : @sprintf("0x%04x", x)
 
 
-const SubnormalIcon = '↯'
+const SubnormalIcon = "ς"
 
 function AllSubnormalIconsOf(fmt::Format)
-    subnormal_icons = fill(' ', nValuesOf(fmt))
+    subnormal_icons = fill(" ", nValuesOf(fmt))
     PrecisionOf(fmt) == 1 && return subnormal_icons
 
     npos_subnormals = nPosSubnormalsOf(fmt)

@@ -7,13 +7,13 @@ const DecFmtKinds = (;
 const DecSubnormalMarker = "!"
 const Log2DenomColumn = :log2_denom
 
-const StrBig = Union{String,BigInt}
+const StrBig = Union{String,BigInt,Int64}
 const VecStrBig = Vector{StrBig}
 const UINT = Union{Int,UInt8,UInt16}
 const VecUI = Vector{UINT}
 const VecStr = Vector{String}
 
-function DataFrameOf(codepoints::VecUI, numerators::VecStrBig, log2denoms::VecStrBig, subnormal_markers::VecStr)
+function DataFrameOf(codepoints::Vector{String}, numerators::Vector{Union{String,BigInt}}, log2denoms::Vector{Union{BigInt,String}}, subnormal_markers::Vector{String})
     DataFrame(
         codepoint=codepoints,
         numerator=numerators,
@@ -47,7 +47,7 @@ end
 function NumeratorAndLog2DenomColumnsOf(fmt::Format)
     n = Int(nValuesOf(fmt))
     numerators = Vector{Union{String,BigInt}}(undef, n)
-    log2denoms = Vector{Union{String,Int}}(undef, n)
+    log2denoms = Vector{Union{String,BigInt}}(undef, n)
 
     cpnan = cp_nan(fmt)
     cpinf = cp_inf(fmt)
@@ -58,15 +58,15 @@ function NumeratorAndLog2DenomColumnsOf(fmt::Format)
 
         if cp == cpnan
             numerators[idx] = "NaN"
-            log2denoms[idx] = 0
+            log2denoms[idx] = zero(BigInt)
             continue
         elseif cp == cpinf
             numerators[idx] = "Inf"
-            log2denoms[idx] = 0
+            log2denoms[idx] = zero(BigInt)
             continue
         elseif cp == cpneginf
             numerators[idx] = "NegInf"
-            log2denoms[idx] = 0
+            log2denoms[idx] = zero(BigInt)
             continue
         end
 
@@ -74,7 +74,7 @@ function NumeratorAndLog2DenomColumnsOf(fmt::Format)
         den = denominator(q)
 
         numerators[idx] = numerator(q)
-        log2denoms[idx] = ispow2(den) ? trailing_zeros(den) : error("Denominator (fmt=$(fmt), codepoint=$(idx-1)) is not a power of 2")
+        log2denoms[idx] = ispow2(den) ? BigInt(trailing_zeros(den)) : error("Denominator (fmt=$(fmt), codepoint=$(idx-1)) is not a power of 2")
     end
 
     return (; numerators, log2denoms)
@@ -97,6 +97,7 @@ for K in MinK:MaxK
             sf=aspath(subsubpath, fournames.sf), se=aspath(subsubpath, fournames.se))
 
         for fmtkind in keys(fourpaths)
+            path = fourpaths[fmtkind]
             signedness, domain = DecFmtKinds[Symbol(fmtkind)]
             fmt = Format{signedness,domain}(K, P)
             comps = NumeratorAndLog2DenomColumnsOf(fmt)
@@ -105,7 +106,7 @@ for K in MinK:MaxK
             #    (:codepoint, :numerator, :log2_denominator, :subnormal)
             #}((codepoints, comps.numerators, comps.log2denoms, subnormal_markers))
             df = DataFrameOf(codepoints, comps.numerators, comps.log2denoms, subnormal_markers)
-            CSV.write(fourpaths[fmtkind], df)
+            CSV.write(path, df)
         end
     end
 
@@ -120,6 +121,7 @@ for K in MinK:MaxK
             uf=aspath(subsubpath, twonames.uf), ue=aspath(subsubpath, twonames.ue))
 
         for fmtkind in keys(twopaths)
+            path = twopaths[fmtkind]
             signedness, domain = DecFmtKinds[Symbol(fmtkind)]
             fmt = Format{signedness,domain}(K, P)
             comps = NumeratorAndLog2DenomColumnsOf(fmt)
@@ -129,7 +131,7 @@ for K in MinK:MaxK
             #}((codepoints, comps.numerators, comps.log2denoms, subnormal_markers))
             # CSV.write(twopaths[Symbol(fmtkind)], localtable)
             df = DataFrameOf(codepoints, comps.numerators, comps.log2denoms, subnormal_markers)
-            CSV.write(fourpaths[fmtkind], df)
+            CSV.write(path, df)
         end
     end
 end

@@ -52,7 +52,7 @@ setprecision(BigFloat, 1024)
 
 Qx64 = Rational{BigInt}
 
-using Tables, CSV
+using Tables, CSV, DataFrames
 
 using Printf
 hex_sprintf(x) = @sprintf("%a", BigFloat(x))
@@ -63,7 +63,7 @@ const Ext = ".csv"
 aspath(parts...) = abspath(parts...)
 
 const MinK = 3
-const MaxK = 16
+const MaxK = 10
 
 include("support.jl")
 include("typing/traits.jl")
@@ -74,8 +74,10 @@ include("counts.jl")
 include("codepoints.jl")
 include("floatvalues.jl")
 include("values.jl")
-include("createfiles.jl")
-include("hextabulations.jl")
+#include("createfiles.jl")
+#include("hextabulations.jl")
+include("createvaluefilesjl")
+include("qtabluations.jl")
 #include("hextables.jl")
 
 end # module

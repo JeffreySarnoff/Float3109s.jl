@@ -7,7 +7,6 @@ const FmtKinds = (;
 codetype(K) = K <= 8 ? UInt8 : K <= 16 ? UInt16 : K <= 32 ? UInt32 : UInt64
 hex_codepoint(K, x) = K <= 8 ? @sprintf("0x%02x", x) : @sprintf("0x%04x", x)
 
-
 const SubnormalIcon = "!"
 
 function AllSubnormalIconsOf(fmt::Format)
@@ -57,7 +56,7 @@ for K in MinK:MaxK
             hexstring_values = AllHexStringValuesOf(fmt)
             subnormal_icons = AllSubnormalIconsOf(fmt)
             localtable = columntable((; codepoint=codepoints, sprintf_a=hexstring_values, subnormal=subnormal_icons))
-            CSV.write(fourpaths[Symbol(fmtkind)], localtable)
+            CSV.write(fourpaths[fmtkind], localtable)
         end
     end
 
@@ -74,10 +73,10 @@ for K in MinK:MaxK
         for fmtkind in keys(twopaths)
             signedness, domain = FmtKinds[Symbol(fmtkind)]
             fmt = Format{signedness,domain}(K, P)
-            subnormal_icons = AllSubnormalIconsOf(fmt)
             hexstring_values = AllHexStringValuesOf(fmt)
+            subnormal_icons = AllSubnormalIconsOf(fmt)
             localtable = columntable((; codepoint=codepoints, sprintf_a=hexstring_values, subnormal=subnormal_icons))
-            CSV.write(twopaths[Symbol(fmtkind)], localtable)
+            CSV.write(twopaths[fmtkind], localtable)
         end
     end
 end

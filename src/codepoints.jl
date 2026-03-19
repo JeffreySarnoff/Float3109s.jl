@@ -46,10 +46,6 @@ cp_two(fmt::Format{SignedFormat,T}) where {T} = twopow(BitwidthOf(fmt) - 2) + tw
 cp_negtwo(fmt::Format{UnsignedFormat,T}) where {T} = nothing
 cp_negtwo(fmt::Format{SignedFormat,T}) where {T} = 3 * twopow(BitwidthOf(fmt) - 2) + twopow(PrecisionOf(fmt) - 1)
 
-
-"""Code point of zero (always 0)."""
-cp_zero(fmt::Format) = zero(typeofcp(fmt))
-
 """Code point of NaN. Unsigned: `cp_max`. Signed: midpoint `2^(K-1)`."""
 cp_nan(@nospecialize fmt::Format{UnsignedFormat,T}) where T = cp_max(fmt)
 cp_nan(@nospecialize fmt::Format{SignedFormat,T}) where T = typeofcp(fmt)(sign_half_offset(fmt))

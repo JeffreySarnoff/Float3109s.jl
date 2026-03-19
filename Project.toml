@@ -5,17 +5,18 @@ version = "0.1.0"
 
 [compat]
 Printf = "1.11"
-Quadmath = "1"
+Quadmath = "0.5"
 Documenter = "1"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Tables = "1.12"
 CSV = "0.10 - 0.20"
-version = "0.10.16"
 julia = "1.12"
 
 [deps]
 Printf = "de0858da-6303-5e67-8744-51eddeeeb8d7"
 Tables = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "1.8"
 Quadmath = "be4d8f0f-7fa4-5f49-b795-2f01399ab2dd"
 
 [extras]

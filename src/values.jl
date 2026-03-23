@@ -1,5 +1,6 @@
 # values.jl — decode the ith code point of any Format to its exact value
 
+#=
 """
     AllHexStringValuesOf(fmt) -> Vector{Qx64}
 
@@ -15,7 +16,7 @@ Special code points map to the canonical string forms:
 """
 function AllHexStringValuesOf(@nospecialize(fmt::Format))
     vals = String[]
-    sizehint!(vals, Int(nValuesOf(fmt)))
+    sizehint!(vals, Int(nValuesOf(fmt)))%
 
     for cp in Int128(0):Int128(cp_max(fmt))
         hexstring = HexStringValueOf(fmt, cp)
@@ -23,6 +24,7 @@ function AllHexStringValuesOf(@nospecialize(fmt::Format))
     end
     return vals
 end
+=#
 
 """
     HexStringValueOf(fmt, cp) -> Rational{BigInt}

@@ -54,16 +54,19 @@ Qx64 = Rational{BigInt}
 
 using Tables, CSV, DataFrames
 
-using Printf
-hex_sprintf(x) = @sprintf("%a", BigFloat(x))
-
-const P3109Base = s"C:/git/P3109/"
+const P3109Base = joinpath(s"C:/git", "P3109")
 const Ext = ".csv"
 
 aspath(parts...) = abspath(parts...)
 
-const MinK = 3
-const MaxK = 10
+const MinK = 11
+const MaxK = 18
+
+
+include("Printf2.jl")
+using .Printf2
+
+hex_sprintf(x) = @sprintf2("%a", BigFloat(x))
 
 include("support.jl")
 include("typing/traits.jl")
@@ -74,10 +77,11 @@ include("counts.jl")
 include("codepoints.jl")
 include("floatvalues.jl")
 include("values.jl")
-#include("createfiles.jl")
-#include("hextabulations.jl")
-include("createvaluefilesjl")
-include("qtabluations.jl")
+include("hexstrings.jl")
+include("createfiles.jl")
+include("hextabulations.jl")
+#include("createvaluefilesjl")
+#include("qtabluations.jl")
 #include("hextables.jl")
 
 end # module

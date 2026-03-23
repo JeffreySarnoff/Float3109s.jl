@@ -5,7 +5,7 @@ const FmtKinds = (;
     se=(SignedFormat, ExtendedFormat))
 
 codetype(K) = K <= 8 ? UInt8 : K <= 16 ? UInt16 : K <= 32 ? UInt32 : UInt64
-hex_codepoint(K, x) = K <= 8 ? @sprintf("0x%02x", x) : @sprintf("0x%04x", x)
+hex_codepoint(K, x) = K <= 8 ? @sprintf2("0x%02x", x) : @sprintf2("0x%04x", x)
 
 const SubnormalIcon = "!"
 

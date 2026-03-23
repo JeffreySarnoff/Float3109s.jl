@@ -8,7 +8,7 @@ using Base.Ryu
 
 export @sprintf2, @sprintf2a_normal, @sprintf2a_subnormal, sprintf2a
 
-publicformat,Format
+public format,Format
 
 # format specifier categories
 const Ints = Union{Val{'d'},Val{'i'},Val{'u'},Val{'x'},Val{'X'},Val{'o'}}
@@ -491,7 +491,7 @@ tofloat(x::Base.IEEEFloat) = x
 tofloat(x::BigFloat) = x
 
 _snprintf2(ptr, siz, str, arg) =
-    @ccall "libmpfr".mpfr_snprintf2(ptr::Ptr{UInt8}, siz::Csize_t, str::Ptr{UInt8};
+    @ccall "libmpfr".mpfr_snprintf(ptr::Ptr{UInt8}, siz::Csize_t, str::Ptr{UInt8};
         arg::Ref{BigFloat})::Cint
 
 # Arbitrary constant for a maximum number of bytes we want to output for a BigFloat.

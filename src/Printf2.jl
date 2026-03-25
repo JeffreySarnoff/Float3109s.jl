@@ -494,6 +494,25 @@ _snprintf2(ptr, siz, str, arg) =
     @ccall "libmpfr".mpfr_snprintf(ptr::Ptr{UInt8}, siz::Csize_t, str::Ptr{UInt8};
         arg::Ref{BigFloat})::Cint
 
+const _MPFR_FMT_Ra = "%Ra"
+const _MPFR_FMT_RA = "%RA"
+
+@inline function _is_default_bigfloat_spec(spec::Spec)
+    !spec.leftalign &&
+    !spec.plus &&
+    !spec.space &&
+    !spec.zero &&
+    !spec.hash &&
+    spec.width == 0 &&
+    spec.precision < 0 &&
+    !spec.dynamic_width &&
+    !spec.dynamic_precision
+end
+
+@inline _mpfr_format_string(spec::Spec{Val{'a'}}) = _is_default_bigfloat_spec(spec) ? _MPFR_FMT_Ra : string(spec; modifier="R")
+@inline _mpfr_format_string(spec::Spec{Val{'A'}}) = _is_default_bigfloat_spec(spec) ? _MPFR_FMT_RA : string(spec; modifier="R")
+@inline _mpfr_format_string(spec::Spec) = string(spec; modifier="R")
+
 # Arbitrary constant for a maximum number of bytes we want to output for a BigFloat.
 # 8KiB seems like a reasonable default. Larger BigFloat representations should probably
 # use a custom printing routine. Printing values with results larger than this ourselves
@@ -508,7 +527,7 @@ function fmt(buf, pos, arg, spec::Spec{T}) where {T<:Floats}
         if isfinite(x)
             GC.@preserve buf begin
                 siz = length(buf) - pos + 1
-                str = string(spec; modifier="R")
+                str = _mpfr_format_string(spec)
                 required_length = _snprintf2(pointer(buf, pos), siz, str, x)
                 if required_length > siz
                     required_length > __BIG_FLOAT_MAX__ &&
@@ -1043,7 +1062,7 @@ macro sprintf2(fmt, args...)
     return esc(:($Printf2.format($f, $(args...))))
 end
 
-function _normalize_a_string_to_leading_one(s::AbstractString)
+function _normalize_a_string_to_leading_one_legacy(s::AbstractString)
     ncodeunits(s) == 0 && return s
 
     sign = ""
@@ -1090,7 +1109,7 @@ function _normalize_a_string_to_leading_one(s::AbstractString)
     return string(sign, "0x", mantnew, "p", expnew)
 end
 
-function _normalize_a_string_to_leading_zero(s::AbstractString)
+function _normalize_a_string_to_leading_zero_legacy(s::AbstractString)
     ncodeunits(s) == 0 && return s
 
     sign = ""
@@ -1125,13 +1144,79 @@ function _normalize_a_string_to_leading_zero(s::AbstractString)
     return string(sign, "0x0.", fracnew, "p", expnew_str)
 end
 
+function _normalize_a_string_to_leading_one(s::AbstractString)
+    ncodeunits(s) == 0 && return s
+
+    i = firstindex(s)
+    if s[i] == '-' || s[i] == '+'
+        i = nextind(s, i)
+    end
+
+    j = nextind(s, i)
+    j <= lastindex(s) || return s
+    (s[i] == '0' && (s[j] == 'x' || s[j] == 'X')) || return s
+
+    p = findnext('p', s, j)
+    p === nothing && (p = findnext('P', s, j))
+    p === nothing && return s
+
+    mantissa_start = nextind(s, j)
+    mantissa_end = prevind(s, p)
+    dot = findnext('.', s, mantissa_start)
+    intpart_end = dot === nothing || dot > mantissa_end ? mantissa_end : prevind(s, dot)
+    intpart = SubString(s, mantissa_start, intpart_end)
+    intpart == "1" && return s
+
+    _normalize_a_string_to_leading_one_legacy(s)
+end
+
+function _normalize_a_string_to_leading_zero(s::AbstractString)
+    ncodeunits(s) == 0 && return s
+
+    sign = ""
+    i = firstindex(s)
+    if s[i] == '-' || s[i] == '+'
+        sign = string(s[i])
+        i = nextind(s, i)
+    end
+
+    j = nextind(s, i)
+    j <= lastindex(s) || return s
+    (s[i] == '0' && (s[j] == 'x' || s[j] == 'X')) || return s
+
+    p = findnext('p', s, j)
+    p === nothing && (p = findnext('P', s, j))
+    p === nothing && return s
+
+    mantissa_start = nextind(s, j)
+    mantissa_end = prevind(s, p)
+    dot = findnext('.', s, mantissa_start)
+    intpart_end = dot === nothing || dot > mantissa_end ? mantissa_end : prevind(s, dot)
+    intpart = SubString(s, mantissa_start, intpart_end)
+    fracpart = dot === nothing || dot > mantissa_end ? "" : SubString(s, nextind(s, dot), mantissa_end)
+
+    intpart == "0" && return s
+
+    if intpart == "1"
+        exp = parse(Int, SubString(s, nextind(s, p), lastindex(s)))
+        fracnew = isempty(fracpart) ? "1" : string("1", fracpart)
+        expnew = exp + 4
+        expnew_str = expnew >= 0 ? string("+", expnew) : string(expnew)
+        return string(sign, "0x0.", fracnew, "p", expnew_str)
+    end
+
+    _normalize_a_string_to_leading_zero_legacy(s)
+end
+
 """
     @sprintf2a_normal(args...)
 
 Return `%a` formatted output as string 0x1._.
 """
+const _FORMAT_PERCENT_A = Format("%a")
+
 macro sprintf2a_normal(args...)
-    f = Format("%a")
+    f = _FORMAT_PERCENT_A
     return esc(:($Printf2._normalize_a_string_to_leading_one($Printf2.format($f, $(args...)))))
 end
 
@@ -1142,7 +1227,7 @@ end
 Return `%a` formatted output as string 0x0._.
 """
 macro sprintf2a_subnormal(args...)
-    f = Format("%a")
+    f = _FORMAT_PERCENT_A
     return esc(:($Printf2._normalize_a_string_to_leading_zero($Printf2.format($f, $(args...)))))
 end
 
@@ -1153,7 +1238,8 @@ Return `%a` formatted output as string with either normal (`0x1._`) or
 subnormal-style (`0x0._`) mantissa normalization.
 """
 function sprintf2a(args...; subnormal=false)
-    subnormal == false ? @sprintf2a_normal(args...) : @sprintf2a_subnormal(args...)
+    s = format(_FORMAT_PERCENT_A, args...)
+    subnormal ? _normalize_a_string_to_leading_zero(s) : _normalize_a_string_to_leading_one(s)
 end
 
 end # module

@@ -91,20 +91,53 @@ Special code points map to the canonical `Qx64` forms:
 
 For finite numerical code points the result is an exact dyadic rational.
 """
-function ValueOf(@nospecialize(fmt::Format), cp::Integer)
-    0 <= cp <= cp_max(fmt) || throw(ArgumentError("code point $cp out of range [0, $(cp_max(fmt))]"))
+@inline function _decode_signed_finite_unchecked(@nospecialize(fmt::Format{SignedFormat,T}), cp::Integer) where T
+    h = sign_half_offset(fmt)
+    if cp < h
+        return _decode_positive_half(fmt, cp)
+    end
+    return -_decode_positive_half(fmt, cp - h)
+end
 
-    cp == cp_zero(fmt) && return zero(Qx64)
-    cp == cp_nan(fmt) && return Qx64(NaN)
+@inline function ValueOf(@nospecialize(fmt::Format{UnsignedFormat,FiniteFormat}), cp::Integer)
+    cpmax = cp_max(fmt)
+    0 <= cp <= cpmax || throw(ArgumentError("code point $cp out of range [0, $cpmax]"))
+    cp == 0 && return zero(Qx64)
+    cp == cpmax && return Qx64(NaN)
+    _decode_positive_half(fmt, cp)
+end
 
-    inf_cp = cp_inf(fmt)
-    inf_cp !== nothing && cp == inf_cp && return Qx64(Inf)
-    ninf_cp = cp_neginf(fmt)
-    ninf_cp !== nothing && cp == ninf_cp && return Qx64(-Inf)
+@inline function ValueOf(@nospecialize(fmt::Format{UnsignedFormat,ExtendedFormat}), cp::Integer)
+    cpmax = cp_max(fmt)
+    cpnan = cpmax
+    cpinf = cpnan - one(typeofcp(fmt))
+    0 <= cp <= cpmax || throw(ArgumentError("code point $cp out of range [0, $cpmax]"))
+    cp == 0 && return zero(Qx64)
+    cp == cpnan && return Qx64(NaN)
+    cp == cpinf && return Qx64(Inf)
+    _decode_positive_half(fmt, cp)
+end
 
-    red = sign_reduce(fmt, cp)
-    val = _decode_positive_half(fmt, red.cp_abs)
-    return red.s == 0 ? val : -val
+@inline function ValueOf(@nospecialize(fmt::Format{SignedFormat,FiniteFormat}), cp::Integer)
+    cpmax = cp_max(fmt)
+    cpnan = cp_nan(fmt)
+    0 <= cp <= cpmax || throw(ArgumentError("code point $cp out of range [0, $cpmax]"))
+    cp == 0 && return zero(Qx64)
+    cp == cpnan && return Qx64(NaN)
+    _decode_signed_finite_unchecked(fmt, cp)
+end
+
+@inline function ValueOf(@nospecialize(fmt::Format{SignedFormat,ExtendedFormat}), cp::Integer)
+    cpmax = cp_max(fmt)
+    cpnan = cp_nan(fmt)
+    cpinf = cpnan - one(typeofcp(fmt))
+    cpninf = cpmax
+    0 <= cp <= cpmax || throw(ArgumentError("code point $cp out of range [0, $cpmax]"))
+    cp == 0 && return zero(Qx64)
+    cp == cpnan && return Qx64(NaN)
+    cp == cpinf && return Qx64(Inf)
+    cp == cpninf && return Qx64(-Inf)
+    _decode_signed_finite_unchecked(fmt, cp)
 end
 
 """
@@ -135,22 +168,50 @@ Subnormal (`cp_abs < m`):  value = cp_abs · twopow(2 − P − B)
 Normal    (`cp_abs ≥ m`):  e = cp_abs ÷ m,  t = cp_abs mod m,  k = e − B
                            value = twopowk + t · twopow(k + 1 − P)
 """
-function _decode_positive_half(@nospecialize(fmt::Format), cp_abs::Integer)
+@inline function _dyadic_from_mantissa_shift(mantissa::Integer, shift::Integer)
+    if shift >= 0
+        return (BigInt(mantissa) << Int(shift)) // BigInt(1)
+    end
+    return BigInt(mantissa) // (BigInt(1) << Int(-shift))
+end
+
+function _decode_positive_half_legacy(@nospecialize(fmt::Format), cp_abs::Integer)
     P = PrecisionOf(fmt)
     B = BigInt(ExponentBiasOf(fmt))
-    m = BigInt(significand_scale(fmt))      # twopow(P-1)
+    m = BigInt(significand_scale(fmt))
     ca = BigInt(cp_abs)
 
     if ca < m
-        # subnormal
         return Qx64(dyadic_twopow(2 - P - Int(B))) * Qx64(ca)
-    else
-        # normal: binade decomposition
-        e = fld(ca, m)
-        t = mod(ca, m)
-        k = Int(e - B)
-        return Qx64(dyadic_twopow(k)) + Qx64(t) * Qx64(dyadic_twopow(k + 1 - P))
     end
+
+    e = fld(ca, m)
+    t = mod(ca, m)
+    k = Int(e - B)
+    return Qx64(dyadic_twopow(k)) + Qx64(t) * Qx64(dyadic_twopow(k + 1 - P))
+end
+
+function _decode_positive_half(@nospecialize(fmt::Format), cp_abs::Integer)
+    P = PrecisionOf(fmt)
+    Bu = ExponentBiasOf(fmt)
+    mu = significand_scale(fmt)
+
+    if Bu <= typemax(Int) && mu <= typemax(Int) && cp_abs <= typemax(Int)
+        B = Int(Bu)
+        m = Int(mu)
+        ca = Int(cp_abs)
+
+        if ca < m
+            return _dyadic_from_mantissa_shift(ca, 2 - P - B)
+        end
+
+        e = ca >> (P - 1)
+        t = ca & (m - 1)
+        mantissa = m + t
+        return _dyadic_from_mantissa_shift(mantissa, e - B + 1 - P)
+    end
+
+    _decode_positive_half_legacy(fmt, cp_abs)
 end
 
 # =========================================================================

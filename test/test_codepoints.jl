@@ -7,9 +7,9 @@ using Float3109s
 
 function all_formats(K, P)
     fmts = []
-    for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-        (is_signed, is_finite), (is_signed, is_extended))
-        Σ = S === is_signed ? 1 : 0
+    for (S, D) in ((UnsignedFormat, FiniteFormat), (UnsignedFormat, ExtendedFormat),
+        (SignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
+        Σ = S === SignedFormat ? 1 : 0
         W = K - P + 1 - Σ
         W >= 1 || continue
         push!(fmts, Format{S,D}(K, P))
@@ -67,7 +67,7 @@ end
     # unsigned: NaN is at cp_max (last code point)
     for K in 2:10, P in 1:K
         K - P + 1 >= 1 || continue
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{UnsignedFormat,D}(K, P)
             @test cp_nan(fmt) == cp_max(fmt)
         end
@@ -75,7 +75,7 @@ end
 
     # signed: NaN is at the midpoint (sign_half_offset)
     for K in 3:10, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             @test cp_nan(fmt) == twopow(K - 1)
         end
@@ -88,8 +88,8 @@ end
 
 @testset "cp_inf / cp_neginf for finite-domain → nothing" begin
     for K in 3:10, P in 1:(K-1)
-        for S in (is_unsigned, is_signed)
-            Σ = S === is_signed ? 1 : 0
+        for S in (UnsignedFormat, SignedFormat)
+            Σ = S === SignedFormat ? 1 : 0
             K - P + 1 - Σ >= 1 || continue
             fmt = Format{S,FiniteFormat}(K, P)
             @test cp_inf(fmt) === nothing
@@ -184,7 +184,7 @@ end
 @testset "cp_neg_subnormal — unsigned gives nothing" begin
     for K in 3:10, P in 2:K
         K - P + 1 >= 1 || continue
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{UnsignedFormat,D}(K, P)
             @test cp_neg_subnormal_min(fmt) === nothing
             @test cp_neg_subnormal_max(fmt) === nothing
@@ -194,7 +194,7 @@ end
 
 @testset "cp_neg_subnormal — signed, P=1 gives nothing" begin
     for K in 3:10
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, 1)
             @test cp_neg_subnormal_min(fmt) === nothing
             @test cp_neg_subnormal_max(fmt) === nothing
@@ -204,7 +204,7 @@ end
 
 @testset "cp_neg_subnormal — signed, P≥2" begin
     for K in 4:10, P in 2:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             nsmin = cp_neg_subnormal_min(fmt)
             nsmax = cp_neg_subnormal_max(fmt)
@@ -249,7 +249,7 @@ end
 @testset "cp_neg_normal_min / max — unsigned gives nothing" begin
     for K in 2:10, P in 1:K
         K - P + 1 >= 1 || continue
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{UnsignedFormat,D}(K, P)
             @test cp_neg_normal_min(fmt) === nothing
             @test cp_neg_normal_max(fmt) === nothing
@@ -347,7 +347,7 @@ end
 @testset "cp_is_negative — unsigned always false" begin
     for K in 2:8, P in 1:K
         K - P + 1 >= 1 || continue
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{UnsignedFormat,D}(K, P)
             for cp in 0:Int(cp_max(fmt))
                 @test cp_is_negative(fmt, cp) == false
@@ -358,7 +358,7 @@ end
 
 @testset "cp_is_negative — signed, only code points > NaN" begin
     for K in 3:7, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             nan = cp_nan(fmt)
             for cp in 0:Int(cp_max(fmt))
@@ -378,7 +378,7 @@ end
 
 @testset "pos ↔ neg code point roundtrip (signed)" begin
     for K in 3:7, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             # walk all positive code points
             for cp in 1:(Int(cp_nan(fmt))-1)
@@ -408,7 +408,7 @@ end
 
 @testset "cp_changesign is an involution" begin
     for K in 3:7, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             for cp in 0:Int(cp_max(fmt))
                 cp == cp_nan(fmt) && (
@@ -428,7 +428,7 @@ end
 
 @testset "cp_changesign fixed points: zero and NaN" begin
     for K in 3:8, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             @test cp_changesign(fmt, cp_zero(fmt)) == cp_zero(fmt)
             @test cp_changesign(fmt, cp_nan(fmt)) == cp_nan(fmt)
@@ -438,7 +438,7 @@ end
 
 @testset "cp_changesign swaps positive ↔ negative" begin
     for K in 3:7, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             for cp in 1:(Int(cp_nan(fmt))-1)
                 @test cp_is_positive(fmt, cp)
@@ -476,7 +476,7 @@ end
 
 @testset "Code point ordering within negative half (signed, P≥2)" begin
     for K in 4:8, P in 2:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             @testset "K=$K P=$P $(D)" begin
                 # NaN < neg sub min < neg sub max < neg normal min < neg normal max
@@ -509,7 +509,7 @@ end
 
 @testset "Negative subnormal/normal boundary is contiguous (signed, P≥2)" begin
     for K in 4:10, P in 2:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             @test cp_neg_subnormal_max(fmt) + 1 == cp_neg_normal_min(fmt)
         end
@@ -628,3 +628,4 @@ end
     @test cp_neg_normal_min(fmt) == 5   # NaN + 1
     @test cp_neg_normal_max(fmt) == 7   # cp_max
 end
+

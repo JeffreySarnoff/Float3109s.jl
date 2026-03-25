@@ -4,6 +4,7 @@ function AllHexStringValuesOf(fmt::Format{signedness,domain}) where {signedness,
     values = AllValuesOf(fmt)
     hex_values = Vector{String}(undef, length(values))
 
+    cp_nan_fmt = cp_nan(fmt)
     cp_pos_min = cp_pos_subnormal_min(fmt)
     cp_pos_max = cp_pos_subnormal_max(fmt)
     cp_neg_min = cp_neg_subnormal_min(fmt)
@@ -23,6 +24,11 @@ function AllHexStringValuesOf(fmt::Format{signedness,domain}) where {signedness,
         end
         if !is_subnormal && cp_neg_min_i !== nothing && cp_neg_max_i !== nothing
             is_subnormal = cp_neg_min_i <= cp <= cp_neg_max_i
+        end
+
+        if i == cp_nan_fmt + 1
+            hex_values[i] = "NaN"
+            continue
         end
 
         hex_values[i] = sprintf2a(BigFloat(value); subnormal=is_subnormal)

@@ -11,7 +11,7 @@ The implementation emphasizes:
 • direct correspondence between formulas and code
 • suitability as a correctness reference and test oracle
 """
-module Float3109s
+#module Float3109s
 
 export
     FormatTraits,
@@ -52,19 +52,19 @@ setprecision(BigFloat, 1024)
 
 Qx64 = Rational{BigInt}
 
-using Tables, CSV, DataFrames
+using Tables, CSV # DataFrames
 
 const P3109Base = joinpath(s"C:/git", "P3109")
 const Ext = ".csv"
 
 aspath(parts...) = abspath(parts...)
 
-const MinK = 11
-const MaxK = 18
+const MinK = 19
+const MaxK = 19
 
 
 include("Printf2.jl")
-using .Printf2
+using .Printf2: @sprintf2, sprintf2a
 
 hex_sprintf(x) = @sprintf2("%a", BigFloat(x))
 
@@ -84,4 +84,4 @@ include("hextabulations.jl")
 #include("qtabluations.jl")
 #include("hextables.jl")
 
-end # module
+#end # module

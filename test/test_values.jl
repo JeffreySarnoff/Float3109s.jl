@@ -7,9 +7,9 @@ using Float3109s
 
 function all_formats(K, P)
     fmts = []
-    for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-        (is_signed, is_finite), (is_signed, is_extended))
-        Σ = S === is_signed ? 1 : 0
+    for (S, D) in ((UnsignedFormat, FiniteFormat), (UnsignedFormat, ExtendedFormat),
+        (SignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
+        Σ = S === SignedFormat ? 1 : 0
         W = K - P + 1 - Σ
         W >= 1 || continue
         push!(fmts, Format{S,D}(K, P))
@@ -175,7 +175,7 @@ end
 
 @testset "Negative values mirror positive values" begin
     for K in 3:7, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             npos = nPosFiniteValuesOf(fmt)
             nneg = nNegFiniteValuesOf(fmt)
@@ -231,7 +231,7 @@ end
 @testset "ValueOfOrdinalNeg throws for unsigned" begin
     for K in 2:6, P in 1:K
         K - P + 1 >= 1 || continue
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{UnsignedFormat,D}(K, P)
             @test_throws ArgumentError ValueOfOrdinalNeg(fmt, 1)
         end
@@ -240,7 +240,7 @@ end
 
 @testset "ValueOfOrdinalNeg out-of-range throws for signed" begin
     for K in 3:6, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             n = nNegFiniteValuesOf(fmt)
             @test_throws ArgumentError ValueOfOrdinalNeg(fmt, 0)
@@ -251,7 +251,7 @@ end
 
 @testset "ValueOfOrdinalNeg increasing magnitude" begin
     for K in 3:7, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             n = nNegFiniteValuesOf(fmt)
             n >= 2 || continue
@@ -382,7 +382,7 @@ end
 
 @testset "Signed AllFiniteValuesOf: negative < 0 < positive" begin
     for K in 3:7, P in 2:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
             vals = AllFiniteValuesOf(fmt)
 
@@ -436,8 +436,8 @@ end
 # =========================================================================
 
 @testset "K=16 P=8: basic structural sanity" begin
-    for (S, D) in ((is_unsigned, is_finite), (is_signed, is_extended))
-        Σ = S === is_signed ? 1 : 0
+    for (S, D) in ((UnsignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
+        Σ = S === SignedFormat ? 1 : 0
         fmt = Format{S,D}(16, 8)
 
         # ValueOf at boundaries
@@ -504,3 +504,4 @@ end
     # B=1, sub: 1*2^(2-2-1)=1/2, normal: cp2 e=1,k=0: 2^0=1
     @test AllFiniteValuesOf(fmt) == Rational{BigInt}[0, 1//2, 1]
 end
+

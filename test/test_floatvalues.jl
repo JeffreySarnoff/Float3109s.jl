@@ -7,9 +7,9 @@ using Float3109s
 
 function all_formats(K, P)
     fmts = []
-    for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-        (is_signed, is_finite), (is_signed, is_extended))
-        Σ = S === is_signed ? 1 : 0
+    for (S, D) in ((UnsignedFormat, FiniteFormat), (UnsignedFormat, ExtendedFormat),
+        (SignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
+        Σ = S === SignedFormat ? 1 : 0
         W = K - P + 1 - Σ
         W >= 1 || continue
         push!(fmts, Format{S,D}(K, P))
@@ -172,8 +172,8 @@ end
 @testset "val_pos_normal_max: extended < finite (same K,P)" begin
     # Extended formats sacrifice one code point for +Inf, so max finite is smaller
     for K in 3:8, P in 2:(K-1)
-        for S in (is_unsigned, is_signed)
-            Σ = S === is_signed ? 1 : 0
+        for S in (UnsignedFormat, SignedFormat)
+            Σ = S === SignedFormat ? 1 : 0
             K - P + 1 - Σ >= 1 || continue
             ff = Format{S,FiniteFormat}(K, P)
             fe = Format{S,ExtendedFormat}(K, P)
@@ -217,9 +217,9 @@ end
 
 @testset "val_pos_normal_max P=1: each binade has exactly one value" begin
     for K in 2:8
-        for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-            (is_signed, is_finite), (is_signed, is_extended))
-            Σ = S === is_signed ? 1 : 0
+        for (S, D) in ((UnsignedFormat, FiniteFormat), (UnsignedFormat, ExtendedFormat),
+            (SignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
+            Σ = S === SignedFormat ? 1 : 0
             W = K - 1 + 1 - Σ
             W >= 1 || continue
             fmt = Format{S,D}(K, 1)
@@ -289,7 +289,7 @@ end
 
 @testset "val_neg = -val_pos for signed formats (via ValueOf)" begin
     for K in 3:7, P in 2:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             fmt = Format{SignedFormat,D}(K, P)
 
             # smallest negative subnormal = -val_pos_subnormal_min
@@ -370,10 +370,10 @@ end
 
 @testset "val_pos_normal_max increases with K" begin
     for P in 2:4
-        for (S, D) in ((is_unsigned, is_finite), (is_signed, is_extended))
+        for (S, D) in ((UnsignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
             prev = nothing
             for K in (P+1):10
-                Σ = S === is_signed ? 1 : 0
+                Σ = S === SignedFormat ? 1 : 0
                 K - P + 1 - Σ >= 1 || continue
                 fmt = Format{S,D}(K, P)
                 v = val_pos_normal_max(fmt)
@@ -385,3 +385,4 @@ end
         end
     end
 end
+

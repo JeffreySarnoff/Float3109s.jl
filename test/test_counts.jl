@@ -170,10 +170,10 @@ end
 @testset "P=1 → no subnormals" begin
     for K in 2:10
         K >= 2 || continue
-        for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-            (is_signed, is_finite), (is_signed, is_extended))
+        for (S, D) in ((UnsignedFormat, FiniteFormat), (UnsignedFormat, ExtendedFormat),
+            (SignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
             # check W constraint
-            Σ = S === is_signed ? 1 : 0
+            Σ = S === SignedFormat ? 1 : 0
             W = K - 1 + 1 - Σ
             W >= 1 || continue
 
@@ -349,9 +349,9 @@ end
 
 @testset "8-bit formats (like IEEE-like tiny floats)" begin
     # K=8, P=4: similar to E4M3 style
-    for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-        (is_signed, is_finite), (is_signed, is_extended))
-        Σ = S === is_signed ? 1 : 0
+    for (S, D) in ((UnsignedFormat, FiniteFormat), (UnsignedFormat, ExtendedFormat),
+        (SignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
+        Σ = S === SignedFormat ? 1 : 0
         W = 8 - 4 + 1 - Σ
         W >= 1 || continue
         fmt = Format{S,D}(8, 4)
@@ -384,9 +384,9 @@ end
 @testset "Cross-validate counts against exhaustive enumeration K ≤ 8" begin
     for K in 2:8
         for P in 1:K
-            for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-                (is_signed, is_finite), (is_signed, is_extended))
-                Σ = S === is_signed ? 1 : 0
+            for (S, D) in ((UnsignedFormat, FiniteFormat), (UnsignedFormat, ExtendedFormat),
+                (SignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
+                Σ = S === SignedFormat ? 1 : 0
                 W = K - P + 1 - Σ
                 W >= 1 || continue
 
@@ -450,8 +450,8 @@ end
 
 @testset "nBinadesOf equals number of normal binades" begin
     for K in 3:10, P in 1:(K-1)
-        for (S, D) in ((is_unsigned, is_finite), (is_signed, is_extended))
-            Σ = S === is_signed ? 1 : 0
+        for (S, D) in ((UnsignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
+            Σ = S === SignedFormat ? 1 : 0
             W = K - P + 1 - Σ
             W >= 1 || continue
 
@@ -540,7 +540,7 @@ end
 
 @testset "Unsigned has more positive values than signed" begin
     for K in 3:10, P in 1:(K-1)
-        for D in (is_finite, is_extended)
+        for D in (FiniteFormat, ExtendedFormat)
             uf = Format{UnsignedFormat,D}(K, P)
             sf = Format{SignedFormat,D}(K, P)
 
@@ -556,9 +556,9 @@ end
 @testset "Count functions match length of enumerated value lists K ≤ 7" begin
     for K in 2:7
         for P in 1:K
-            for (S, D) in ((is_unsigned, is_finite), (is_unsigned, is_extended),
-                (is_signed, is_finite), (is_signed, is_extended))
-                Σ = S === is_signed ? 1 : 0
+            for (S, D) in ((UnsignedFormat, FiniteFormat), (UnsignedFormat, ExtendedFormat),
+                (SignedFormat, FiniteFormat), (SignedFormat, ExtendedFormat))
+                Σ = S === SignedFormat ? 1 : 0
                 W = K - P + 1 - Σ
                 W >= 1 || continue
 
@@ -574,3 +574,4 @@ end
         end
     end
 end
+

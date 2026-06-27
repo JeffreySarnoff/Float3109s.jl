@@ -1,0 +1,13 @@
+name = "Float3109s"
+uuid = "e9e35adb-d20c-4ef0-b863-a76b63ac835c"
+authors = ["Jeffrey Sarnoff <JeffreySarnoff@users.noreply.github.com> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.12.6"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

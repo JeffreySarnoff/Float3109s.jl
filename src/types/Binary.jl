@@ -1,3 +1,9 @@
+export BinaryFormat, Binary,
+    BitwidthOf, PrecisionOf, SignednessOf, DomainOf,
+    is_unsigned, is_signed, is_finite, is_extended
+
+public FormatOf
+
 abstract type BinaryFormat{K, P, Σ<:Signedness, Δ<:Domain} end
 
 BitwidthOf(::Type{<:BinaryFormat{K}}) where {K} = K
@@ -66,3 +72,4 @@ function Binary(k::Integer, p::Integer, ::Type{S}, ::Type{D}) where {
     P = IntFormat(p)
     Binary{K, P, S, D}()
 end
+FormatOf(x::Binary) = supertype(typeof(x))

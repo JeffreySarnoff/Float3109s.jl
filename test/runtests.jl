@@ -103,3 +103,21 @@ end
         end
     end
 end
+
+@testset "Domain accessor display" begin
+    F = Float3109s
+    for (D, type_str, instance_str) in (
+        (F.FiniteFormat, F.FiniteStr, F.FiniteFormatStr),
+        (F.ExtendedFormat, F.ExtendedStr, F.ExtendedFormatStr),
+    ), S in (F.UnsignedFormat, F.SignedFormat)
+        T = F.Binary{Int16(5), Int16(2), S, D}
+        @test F.DomainOf(T) === D
+        @test F.DomainOf(T()) === D()
+        for (tag, expected) in ((F.DomainOf(T), type_str), (F.DomainOf(T()), instance_str))
+            @test string(tag) === expected
+            @test sprint(print, tag) == expected
+            @test repr(tag) == expected
+            @test repr(MIME"text/plain"(), tag) == expected
+        end
+    end
+end

@@ -6,6 +6,12 @@ public FormatOf
 
 abstract type BinaryFormat{K, P, Σ<:Signedness, Δ<:Domain} end
 
+function BinaryFormat(K::Integer, P::Integer, ::Type{S}, ::Type{D}) where {
+    S<:Signedness, D<:Domain
+}
+    BinaryFormat{K, P, S, D}
+end
+
 BitwidthOf(::Type{<:BinaryFormat{K}}) where {K} = K
 PrecisionOf(::Type{<:BinaryFormat{K,P}}) where {K,P} = P
 SignednessOf(::Type{<:BinaryFormat{K,P,S}}) where {K,P,S} = S
@@ -72,4 +78,12 @@ function Binary(k::Integer, p::Integer, ::Type{S}, ::Type{D}) where {
     P = IntFormat(p)
     Binary{K, P, S, D}()
 end
+
+function Binary(T::Type{<:BinaryFormat})
+    Binary(BitwidthOf(T), PrecisionOf(T), SignednessOf(T), DomainOf(T))
+end
+
+@inline Base.hash(x::Binary, h::UInt) = hash(typeof(x), h)
+
+FormatOf(x::Type{<:BinaryFormat{K,P,S,D}}) where {K,P,S,D} = x
 FormatOf(x::Binary) = supertype(typeof(x))

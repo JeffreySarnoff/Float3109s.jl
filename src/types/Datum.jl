@@ -1,4 +1,5 @@
-export AbstractDatum, Datum
+export AbstractDatum, Datum,
+    codepoint,
     BitwidthOf, PrecisionOf, SignednessOf, DomainOf,
     is_unsigned, is_signed, is_finite, is_extended
 
@@ -11,6 +12,19 @@ struct Datum{ F<:Binary, U<:UIntDatum } <: AbstractDatum{F}
     code::U
 end
 
+codepoint(@nospecialize x::Datum) = x.code
+
+@inline function Base.:(==)(x::Datum{F}, y::Datum{G}) where {F,G}
+    return F === G && x.code == y.code
+end
+
+@inline function Base.isequal(x::Datum{F}, y::Datum{G}) where {F,G}
+    return F === G && isequal(x.code, y.code)
+end
+
+@inline function Base.hash(x::Datum{F}, h::UInt) where {F}
+    return hash(x.code, hash(F, h))
+end
 
 BitwidthOf(::Datum{F, U}) where {F, U} = BitwidthOf(F)
 PrecisionOf(::Datum{F, U}) where {F, U} = PrecisionOf(F)

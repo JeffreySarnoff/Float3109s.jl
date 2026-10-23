@@ -26,6 +26,43 @@ using Test
     end
 end
 
+@testset "Datum constructors and trait dispatch" begin
+    F = Float3109s
+    for S in (F.UnsignedFormat, F.SignedFormat), D in (F.FiniteFormat, F.ExtendedFormat)
+        format_type = F.BinaryFormat(5, 2, S, D)
+        format = F.Binary(format_type)
+        B = typeof(format)
+        for code in (UInt8(0x11), UInt16(0x11))
+            T = F.Datum{B, typeof(code)}
+            x = T(code)
+            @test F.Datum(format_type, code) === x
+            @test F.Datum(B, code) === x
+            @test F.Datum(format, code) === x
+            @test (@inferred F.codepoint(x)) === code
+            for arg in (F.AbstractDatum{B}, T, x)
+                @test (@inferred F.BitwidthOf(arg)) === F.IntFormat(5)
+                @test (@inferred F.PrecisionOf(arg)) === F.IntFormat(2)
+                @test (@inferred F.is_unsigned(arg)) === (S === F.UnsignedFormat)
+                @test (@inferred F.is_signed(arg)) === (S === F.SignedFormat)
+                @test (@inferred F.is_finite(arg)) === (D === F.FiniteFormat)
+                @test (@inferred F.is_extended(arg)) === (D === F.ExtendedFormat)
+                @test (@inferred F.FormatOf(arg)) === F.FormatOf(format)
+            end
+            for type in (F.AbstractDatum{B}, T)
+                @test (@inferred F.SignednessOf(type)) === S
+                @test (@inferred F.DomainOf(type)) === D
+            end
+            @test (@inferred F.SignednessOf(x)) === S()
+            @test (@inferred F.DomainOf(x)) === D()
+            @test x == F.Datum(format, code)
+            @test isequal(x, F.Datum(format, code))
+            @test hash(x) == hash(F.Datum(format, code))
+            @test !(x == F.Datum(format, code + one(code)))
+        end
+    end
+    @test_throws ArgumentError F.Datum(F.BinaryFormat(2, 1, F.UnsignedFormat, F.FiniteFormat), 0x01)
+end
+
 @testset "Binary inference and trait validation" begin
     F = Float3109s
     for S in (F.UnsignedFormat, F.SignedFormat), D in (F.FiniteFormat, F.ExtendedFormat)

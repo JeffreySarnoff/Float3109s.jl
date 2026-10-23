@@ -8,8 +8,34 @@ public FormatOf
 
 abstract type AbstractDatum{F<:Binary} <: AbstractFloat end
 
+BitwidthOf(::Type{<:AbstractDatum{F}}) where {F} = BitwidthOf(F)
+PrecisionOf(::Type{<:AbstractDatum{F}}) where {F} = PrecisionOf(F)
+SignednessOf(::Type{<:AbstractDatum{F}}) where {F} = SignednessOf(F)
+DomainOf(::Type{<:AbstractDatum{F}}) where {F} = DomainOf(F)
+
+is_unsigned(::Type{<:AbstractDatum{F}}) where {F} = is_unsigned(F)
+is_signed(::Type{<:AbstractDatum{F}}) where {F} = is_signed(F)
+is_finite(::Type{<:AbstractDatum{F}}) where {F} = is_finite(F)
+is_extended(::Type{<:AbstractDatum{F}}) where {F} = is_extended(F)
+
+BitwidthOf(::AbstractDatum{F}) where {F} = BitwidthOf(F)
+PrecisionOf(::AbstractDatum{F}) where {F} = PrecisionOf(F)
+SignednessOf(::AbstractDatum{F}) where {F} = SignednessOf(F)()
+DomainOf(::AbstractDatum{F}) where {F} = DomainOf(F)()
+
+is_unsigned(::AbstractDatum{F}) where {F} = is_unsigned(F)
+is_signed(::AbstractDatum{F}) where {F} = is_signed(F)
+is_finite(::AbstractDatum{F}) where {F} = is_finite(F)
+is_extended(::AbstractDatum{F}) where {F} = is_extended(F)
+
 struct Datum{ F<:Binary, U<:UIntDatum } <: AbstractDatum{F}
     code::U
+end
+
+Datum(f::Binary, code::UIntDatum) = Datum{typeof(f), typeof(code)}(code)
+
+function Datum(T::Type{<:BinaryFormat}, code::UIntDatum)
+    Datum(Binary(T), code)
 end
 
 codepoint(@nospecialize x::Datum) = x.code
@@ -26,19 +52,10 @@ end
     return hash(x.code, hash(F, h))
 end
 
-BitwidthOf(::Datum{F, U}) where {F, U} = BitwidthOf(F)
-PrecisionOf(::Datum{F, U}) where {F, U} = PrecisionOf(F)
-SignednessOf(::Datum{F, U}) where {F, U} = SignednessOf(F)
-DomainOf(::Datum{F, U}) where {F, U} = DomainOf(F)
-
-is_unsigned(::Datum{F, U}) where {F, U} = is_unsigned(F)
-is_signed(::Datum{F, U}) where {F, U} = is_signed(F)
-is_finite(::Datum{F, U}) where {F, U} = is_finite(F)
-is_extended(::Datum{F, U}) where {F, U} = is_extended(F)
-
-FormatOf(x::Datum{F,U}) where {F<:Binary, U<:UIntDatum} =
-    supertype(F)
+FormatOf(::Type{<:AbstractDatum{F}}) where {F} = supertype(F)
+FormatOf(::AbstractDatum{F}) where {F} = supertype(F)
 
 #=
 julia> sf52x11 = Datum{sf52type, UInt8}( 0x11 )
 Datum{Binary{5, 2, 𝙎, 𝙁}, UInt8}(0x11)
+=#
